@@ -49,15 +49,15 @@ async function seed() {
   if (userCount === 0) {
     await conn.query(
       "INSERT INTO users (full_name, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?)",
-      ["Owen Pusey", "operador@nattivo.com", hash, "operator", 1]
+      ["Owen Pusey", "operador@nattivo.com", hash, "admin", 1]
     );
-    console.log("  ✓ Usuario creado");
+    console.log("  ✓ Usuario creado (admin)");
   } else {
     await conn.query(
-      "UPDATE users SET password_hash = ? WHERE email = ?",
+      "UPDATE users SET password_hash = ?, role = 'admin' WHERE email = ?",
       [hash, "operador@nattivo.com"]
     );
-    console.log("  ✓ Contraseña restablecida a: admin123");
+    console.log("  ✓ Contraseña restablecida a: admin123 (rol actualizado a admin)");
   }
 
   // ============================================================
@@ -254,6 +254,7 @@ async function seed() {
       id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
       category_id INT(10) UNSIGNED NOT NULL,
       name VARCHAR(100) NOT NULL,
+      price DECIMAL(12,2) NOT NULL DEFAULT 0,
       default_quantity INT(10) NOT NULL DEFAULT 1,
       display_order INT(10) NOT NULL DEFAULT 0,
       is_active TINYINT(1) NOT NULL DEFAULT 1,
@@ -262,6 +263,11 @@ async function seed() {
       FOREIGN KEY (category_id) REFERENCES minibar_categories(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Add price column if missing (for existing databases)
+  try {
+    await conn.query("ALTER TABLE minibar_products ADD COLUMN price DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER name");
+  } catch (e) { /* column may already exist */ }
 
   await conn.query(`
     CREATE TABLE IF NOT EXISTS room_minibar_inventory (
@@ -274,6 +280,27 @@ async function seed() {
       UNIQUE KEY room_product (room_id, product_id),
       FOREIGN KEY (room_id) REFERENCES rooms(id),
       FOREIGN KEY (product_id) REFERENCES minibar_products(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  // Minibar movements table for tracking all inventory changes
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS minibar_movements (
+      id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+      room_id INT(10) UNSIGNED NOT NULL,
+      product_id INT(10) UNSIGNED NOT NULL,
+      movement_type ENUM('consumption','restock','adjustment','void') NOT NULL,
+      quantity_before INT(10) NOT NULL,
+      quantity_moved INT(10) NOT NULL,
+      quantity_after INT(10) NOT NULL,
+      user_id INT(10) UNSIGNED DEFAULT NULL,
+      user_name VARCHAR(100) DEFAULT NULL,
+      notes TEXT DEFAULT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      FOREIGN KEY (room_id) REFERENCES rooms(id),
+      FOREIGN KEY (product_id) REFERENCES minibar_products(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
@@ -299,44 +326,44 @@ async function seed() {
   const [[{ count: prodCount }]] = await conn.query("SELECT COUNT(*) AS count FROM minibar_products");
   if (prodCount === 0) {
     const canastaProducts = [
-      ["Chiclets Trident", 1, 1],
-      ["Salchichas Viena", 1, 2],
-      ["Aceitunas", 1, 3],
-      ["Monterrojo", 1, 4],
-      ["Pringles", 1, 5],
-      ["Combo Cheddar", 1, 6],
-      ["Pistacho", 1, 7],
-      ["Barra de proteína Zubu", 1, 8],
-      ["Pretzels sal marina", 1, 9],
-      ["Albaricoques deshidratados", 1, 10],
-      ["Kinops", 2, 11],
-      ["Gummis", 1, 12],
-      ["Chocolate Mundial", 1, 13]
+      ["Chiclets Trident", 15000, 1, 1],
+      ["Salchichas Viena", 13000, 1, 2],
+      ["Aceitunas", 25000, 1, 3],
+      ["Monterrojo", 18000, 1, 4],
+      ["Pringles", 16000, 1, 5],
+      ["Combo Cheddar", 15000, 1, 6],
+      ["Pistacho", 15000, 1, 7],
+      ["Barra de proteína Zubu", 12000, 1, 8],
+      ["Pretzels sal marina", 15000, 1, 9],
+      ["Albaricoques deshidratados", 27000, 1, 10],
+      ["Kinops", 15000, 2, 11],
+      ["Gummis", 15000, 1, 12],
+      ["Chocolate Mundial", 29000, 1, 13]
     ];
-    for (const [name, qty, order] of canastaProducts) {
+    for (const [name, price, qty, order] of canastaProducts) {
       await conn.query(
-        "INSERT INTO minibar_products (category_id, name, default_quantity, display_order) VALUES (?, ?, ?, ?)",
-        [canastaId, name, qty, order]
+        "INSERT INTO minibar_products (category_id, name, price, default_quantity, display_order) VALUES (?, ?, ?, ?, ?)",
+        [canastaId, name, price, qty, order]
       );
     }
 
     const neveraProducts = [
-      ["Electronit", 2, 1],
-      ["Agua Mineral", 2, 2],
-      ["Agua con gas", 2, 3],
-      ["Soda Júpiter", 1, 4],
-      ["Júpiter Toronja", 1, 5],
-      ["Júpiter Tónica", 1, 6],
-      ["Red Bull", 1, 7],
-      ["Coca Cola Clásica", 2, 8],
-      ["Coca Cola Cero", 2, 9],
-      ["Coronita", 2, 10],
-      ["Club Colombia", 4, 11]
+      ["Electronit", 25000, 2, 1],
+      ["Agua Mineral", 12000, 2, 2],
+      ["Agua con gas", 12000, 2, 3],
+      ["Soda Júpiter", 18000, 1, 4],
+      ["Júpiter Toronja", 16000, 1, 5],
+      ["Júpiter Tónica", 5000, 1, 6],
+      ["Red Bull", 17000, 1, 7],
+      ["Coca Cola Clásica", 11000, 2, 8],
+      ["Coca Cola Cero", 11000, 2, 9],
+      ["Coronita", 11000, 2, 10],
+      ["Club Colombia", 11000, 4, 11]
     ];
-    for (const [name, qty, order] of neveraProducts) {
+    for (const [name, price, qty, order] of neveraProducts) {
       await conn.query(
-        "INSERT INTO minibar_products (category_id, name, default_quantity, display_order) VALUES (?, ?, ?, ?)",
-        [neveraId, name, qty, order]
+        "INSERT INTO minibar_products (category_id, name, price, default_quantity, display_order) VALUES (?, ?, ?, ?, ?)",
+        [neveraId, name, price, qty, order]
       );
     }
     console.log("  ✓ Productos de minibar creados");

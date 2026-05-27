@@ -15,6 +15,7 @@
   --color-primary-hover: #5B6448;
   --color-primary-active: #3F4732;
   --color-primary-soft: rgba(77, 85, 61, 0.12);
+  --color-primary-light: rgba(77, 85, 61, 0.08);
 
   /* Complemento cálido */
   --color-secondary: #C9A45D;
@@ -104,6 +105,7 @@
   --color-primary-hover: #B8C8A4;
   --color-primary-active: #C8D8B4;
   --color-primary-soft: rgba(168, 184, 148, 0.14);
+  --color-primary-light: rgba(168, 184, 148, 0.10);
 
   --color-secondary: #D8B86A;
   --color-secondary-hover: #E5C879;

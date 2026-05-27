@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
   <!-- Remix Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
 
   <!-- Styles -->
   <link rel="stylesheet" href="/css/theme.css" />
@@ -32,10 +32,10 @@
       <div class="login-top-bar">
         <div class="theme-toggle-group" id="login-theme-switcher">
           <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Cambiar a modo claro" title="Cambiar a modo claro">
-            <i class="ri-sun-line"></i>
+            <i class="ph-light ph-sun"></i>
           </button>
           <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
-            <i class="ri-moon-line"></i>
+            <i class="ph-light ph-moon"></i>
           </button>
         </div>
 
@@ -66,7 +66,7 @@
         <div class="field">
           <label for="email" data-i18n="loginEmail">Correo electrónico</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-mail-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-envelope"></i></span>
             <input
               type="email"
               id="email"
@@ -77,7 +77,7 @@
               required
             />
             <span class="field-status" id="email-status">
-              <i class="ri-check-line"></i>
+              <i class="ph-light ph-check"></i>
             </span>
           </div>
         </div>
@@ -85,7 +85,7 @@
         <div class="field">
           <label for="password" data-i18n="loginPassword">Contraseña</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-lock-2-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-lock"></i></span>
             <input
               type="password"
               id="password"
@@ -96,7 +96,7 @@
               required
             />
             <button type="button" class="field-toggle" id="password-toggle">
-              <i class="ri-eye-off-line"></i>
+              <i class="ph-light ph-eye-slash"></i>
             </button>
           </div>
         </div>
@@ -104,7 +104,7 @@
         <div class="login-options">
           <label class="checkbox">
             <input type="checkbox" id="remember" name="remember" />
-            <span class="checkbox-box"><i class="ri-check-line"></i></span>
+            <span class="checkbox-box"><i class="ph-light ph-check"></i></span>
             <span data-i18n="loginRemember">Recordarme</span>
           </label>
           <button type="button" class="link-button" data-i18n="loginForgot">¿Olvidaste tu contraseña?</button>

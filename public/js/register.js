@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
       passwordInput.type = isHidden ? "text" : "password";
       const icon = passwordToggle.querySelector("i");
       if (icon) {
-        icon.className = isHidden ? "ri-eye-line" : "ri-eye-off-line";
+        icon.className = isHidden ? "ph-light ph-eye" : "ph-light ph-eye-slash";
       }
     });
   }

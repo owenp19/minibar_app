@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/login.css" />
@@ -34,10 +34,10 @@
       <div class="login-top-bar">
         <div class="theme-toggle-group" id="register-theme-switcher">
           <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Cambiar a modo claro">
-            <i class="ri-sun-line"></i>
+            <i class="ph-light ph-sun"></i>
           </button>
           <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Cambiar a modo oscuro">
-            <i class="ri-moon-line"></i>
+            <i class="ph-light ph-moon"></i>
           </button>
         </div>
 
@@ -65,7 +65,7 @@
         <div class="field">
           <label for="full-name" data-i18n="registerName">Nombre completo</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-user-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-user"></i></span>
             <input type="text" id="full-name" name="fullName" data-i18n-placeholder="registerNamePlaceholder" placeholder="Ej: Juan Pérez" autocomplete="name" required />
           </div>
         </div>
@@ -73,25 +73,25 @@
         <div class="field">
           <label for="email" data-i18n="registerEmail">Correo electrónico</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-mail-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-envelope"></i></span>
             <input type="email" id="email" name="email" data-i18n-placeholder="registerEmailPlaceholder" placeholder="operador@nattivo.com" autocomplete="email" required />
-            <span class="field-status" id="email-status"><i class="ri-check-line"></i></span>
+            <span class="field-status" id="email-status"><i class="ph-light ph-check"></i></span>
           </div>
         </div>
 
         <div class="field">
           <label for="password" data-i18n="registerPassword">Contraseña</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-lock-2-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-lock"></i></span>
             <input type="password" id="password" name="password" data-i18n-placeholder="registerPasswordPlaceholder" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required minlength="6" />
-            <button type="button" class="field-toggle" id="password-toggle"><i class="ri-eye-off-line"></i></button>
+            <button type="button" class="field-toggle" id="password-toggle"><i class="ph-light ph-eye-slash"></i></button>
           </div>
         </div>
 
         <div class="field">
           <label for="confirm-password" data-i18n="registerConfirm">Confirmar contraseña</label>
           <div class="field-input-wrapper">
-            <span class="field-icon"><i class="ri-lock-2-line"></i></span>
+            <span class="field-icon"><i class="ph-light ph-lock"></i></span>
             <input type="password" id="confirm-password" name="confirmPassword" data-i18n-placeholder="registerConfirmPlaceholder" placeholder="Repite la contraseña" autocomplete="new-password" required />
           </div>
         </div>

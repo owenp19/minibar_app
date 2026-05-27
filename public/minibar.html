@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/app.css" />
@@ -30,6 +30,7 @@
 
         <div class="sidebar-user">
           <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
             <span id="user-initials"></span>
           </div>
           <div class="sidebar-user-info">
@@ -38,42 +39,28 @@
           </div>
         </div>
 
-        <div class="sidebar-quick">
-          <a class="quick-btn" href="/app/ChargeIt">
-            <i class="ri-flashlight-line"></i>
-            <span data-i18n="navNewConsumption">Nuevo consumo</span>
-          </a>
-        </div>
-
         <nav class="sidebar-nav">
-          <a href="/app/ChargeIt" class="nav-item">
-            <i class="ri-shopping-bag-3-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
-          </a>
           <a href="/app/minibar" class="nav-item nav-item-active" aria-current="page">
-            <i class="ri-fridge-line nav-icon"></i>
+            <i class="ph-light ph-fridge nav-icon"></i>
             <span class="nav-label" data-i18n="navMinibars">Minibares</span>
           </a>
+          <a href="/app/admin" class="nav-item">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label">Admin</span>
+          </a>
           <a href="/unlock.html" class="nav-item">
-            <i class="ri-key-2-line nav-icon"></i>
+            <i class="ph-light ph-key nav-icon"></i>
             <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
           </a>
           <a href="/perfil" class="nav-item">
-            <i class="ri-user-3-line nav-icon"></i>
+            <i class="ph-light ph-user nav-icon"></i>
             <span class="nav-label" data-i18n="navProfile">Perfil</span>
           </a>
           <a href="/settings" class="nav-item">
-            <i class="ri-settings-3-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navSettings">Configuración</span>
+            <i class="ph-light ph-gear nav-icon"></i>
+            <span class="nav-label" data-i18n="navSettings">Configuraci&oacute;n</span>
           </a>
         </nav>
-
-        <div class="sidebar-nav" style="margin-top:auto">
-          <a href="#" class="nav-item" id="help-btn">
-            <i class="ri-question-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
-          </a>
-        </div>
 
         <div class="sidebar-credit">
           <span data-i18n="footerVersion">v1.0.1</span><br>
@@ -84,8 +71,8 @@
       <div class="sidebar-bottom">
         <form action="/api/auth/logout" method="POST" class="sidebar-nav">
           <button type="submit" class="nav-item nav-item-danger">
-            <i class="ri-logout-box-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
+            <i class="ph-light ph-sign-out nav-icon"></i>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesi&oacute;n</span>
           </button>
         </form>
       </div>
@@ -93,35 +80,35 @@
 
     <main class="main-panel">
       <header class="main-header">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
-          <i class="ri-menu-line"></i>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir men&uacute;">
+          <i class="ph-light ph-list"></i>
         </button>
 
         <div class="main-header-title">
           <div id="breadcrumb">
             <span class="crumb">
-              <i class="ri-home-5-line"></i>
+              <i class="ph-light ph-house"></i>
               <span class="crumb-current" data-i18n="breadcrumbMinibars">Minibares</span>
             </span>
           </div>
 
           <h1>
-            <i class="ri-fridge-line minibar-header-icon"></i>
-            <span data-i18n="minibarTitle">Gestión de Minibar</span>
+            <i class="ph-light ph-fridge minibar-header-icon"></i>
+            <span data-i18n="minibarTitle">Gesti&oacute;n de Minibar</span>
           </h1>
 
           <p id="page-description" data-i18n="minibarDesc">
-            Selecciona un piso para ver sus habitaciones y revisar el inventario del minibar.
+            Selecciona un piso para ver sus habitaciones y gestionar el minibar.
           </p>
         </div>
 
         <div class="header-controls">
           <div class="theme-toggle-group" id="app-theme-switcher">
             <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
-              <i class="ri-sun-line"></i>
+              <i class="ph-light ph-sun"></i>
             </button>
             <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
-              <i class="ri-moon-line"></i>
+              <i class="ph-light ph-moon"></i>
             </button>
           </div>
           <div class="header-lang-group" id="app-lang-selector">
@@ -131,15 +118,41 @@
         </div>
       </header>
 
-      <!-- VIEW 1: Floor Selection -->
-      <section id="view-floors" class="card view-section active">
+      <!-- VIEW 0: Dashboard -->
+      <section id="view-dashboard" class="card view-section">
         <div class="card-head">
           <div class="card-head-left">
             <h2 class="card-title">
-              <i class="ri-building-2-line" style="margin-right:8px;"></i>
+              <i class="ph-light ph-layout" style="margin-right:8px;"></i>
+              <span>Dashboard</span>
+            </h2>
+            <p class="card-subtitle">Resumen r&aacute;pido del estado del minibar.</p>
+          </div>
+          <div class="card-head-actions">
+            <button class="btn-primary btn-sm" type="button" id="dash-go-floors-btn">
+              <i class="ph-light ph-buildings"></i>
+              <span>Ir a pisos</span>
+            </button>
+            <button class="btn-secondary btn-sm" type="button" id="dash-refresh-btn">
+              <i class="ph-light ph-arrows-clockwise"></i>
+              <span>Actualizar</span>
+            </button>
+          </div>
+        </div>
+        <div id="dashboard-container">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 1: Floor Selection -->
+      <section id="view-floors" class="card view-section">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2 class="card-title">
+              <i class="ph-light ph-buildings" style="margin-right:8px;"></i>
               <span data-i18n="minibarSelectFloor">Seleccionar piso</span>
             </h2>
-            <p class="card-subtitle" data-i18n="minibarSelectFloorDesc">Elige el piso donde se encuentra la habitación.</p>
+            <p class="card-subtitle" data-i18n="minibarSelectFloorDesc">Elige el piso donde se encuentra la habitaci&oacute;n.</p>
           </div>
         </div>
 
@@ -153,14 +166,14 @@
         <div class="card-head">
           <div class="card-head-left">
             <h2 class="card-title">
-              <i class="ri-hotel-bed-line" style="margin-right:8px;"></i>
+              <i class="ph-light ph-bed" style="margin-right:8px;"></i>
               <span id="rooms-heading" data-i18n="minibarRooms">Habitaciones</span>
             </h2>
-            <p class="card-subtitle" id="rooms-subtitle" data-i18n="minibarRoomsDesc">Selecciona una habitación para ver su inventario.</p>
+            <p class="card-subtitle" id="rooms-subtitle" data-i18n="minibarRoomsDesc">Selecciona una habitaci&oacute;n para ver su inventario.</p>
           </div>
           <div class="card-head-actions">
             <button class="nav-back-btn" type="button" id="back-to-floors-btn">
-              <i class="ri-arrow-left-line"></i>
+              <i class="ph-light ph-arrow-left"></i>
               <span data-i18n="minibarBackToFloors">Volver a pisos</span>
             </button>
           </div>
@@ -171,54 +184,204 @@
         </div>
       </section>
 
-      <!-- VIEW 3: Inventory Detail -->
-      <section id="view-inventory" class="card view-section">
+      <!-- VIEW 3: Room Detail (with tabs) -->
+      <section id="view-room-detail" class="card view-section">
         <div class="card-head">
           <div class="card-head-left">
             <h2 class="card-title">
-              <i class="ri-fridge-line" style="margin-right:8px;"></i>
-              <span data-i18n="minibarInventory">Inventario de minibar</span>
+              <i class="ph-light ph-fridge" style="margin-right:8px;"></i>
+              <span data-i18n="minibarRoomDetail">Detalle de habitaci&oacute;n</span>
             </h2>
-            <p class="card-subtitle" data-i18n="minibarInventoryDesc">Revisa y actualiza las cantidades de los productos.</p>
+            <p class="card-subtitle" id="room-detail-subtitle">Gestiona el inventario y consumo de la habitaci&oacute;n.</p>
           </div>
           <div class="card-head-actions">
             <button class="nav-back-btn" type="button" id="back-to-rooms-btn">
-              <i class="ri-arrow-left-line"></i>
+              <i class="ph-light ph-arrow-left"></i>
               <span data-i18n="minibarBackToRooms">Volver a habitaciones</span>
             </button>
           </div>
         </div>
 
-        <div class="inventory-header">
+        <div class="room-detail-header">
           <div class="inventory-location">
-            <span class="location-badge">
-              <i class="ri-building-2-line"></i>
-              <span id="inv-floor-name">—</span>
+            <span class="location-badge" id="rd-floor-name">
+              <i class="ph-light ph-buildings"></i> —
             </span>
-            <span class="location-badge">
-              <i class="ri-hotel-bed-line"></i>
-              <span id="inv-room-name">—</span>
+            <span class="location-badge" id="rd-room-name">
+              <i class="ph-light ph-bed"></i> —
             </span>
           </div>
-          <div class="save-status" id="save-status"></div>
         </div>
 
-        <div id="inventory-container">
-          <!-- populated by JS -->
+        <!-- Tabs Navigation -->
+        <div class="room-tabs" id="room-tabs">
+          <button class="room-tab active" data-tab="inventory">
+            <i class="ph-light ph-fridge"></i>
+            <span data-i18n="minibarTabInventory">Inventario</span>
+          </button>
+          <button class="room-tab" data-tab="consumption">
+            <i class="ph-light ph-shopping-bag"></i>
+            <span data-i18n="minibarTabConsumption">Registrar consumo</span>
+          </button>
+          <button class="room-tab" data-tab="restock">
+            <i class="ph-light ph-plus-square"></i>
+            <span data-i18n="minibarTabRestock">Reponer productos</span>
+          </button>
+          <button class="room-tab" data-tab="adjust">
+            <i class="ph-light ph-wrench"></i>
+            <span data-i18n="minibarTabAdjust">Ajuste manual</span>
+          </button>
+          <button class="room-tab" data-tab="history">
+            <i class="ph-light ph-clock-counter-clockwise"></i>
+            <span data-i18n="minibarTabHistory">Historial</span>
+          </button>
+          <button class="room-tab" data-tab="reports">
+            <i class="ph-light ph-chart-bar"></i>
+            <span data-i18n="minibarTabReports">Reportes</span>
+          </button>
         </div>
 
-        <div class="inventory-actions">
-          <button class="btn-primary" type="button" id="save-inventory-btn">
-            <i class="ri-save-3-line"></i>
-            <span data-i18n="minibarSave">Guardar cambios</span>
-          </button>
-          <button class="btn-secondary" type="button" id="reset-inventory-btn">
-            <i class="ri-refresh-line"></i>
-            <span data-i18n="minibarReset">Restablecer valores iniciales</span>
-          </button>
+        <!-- Tab Content: Inventory -->
+        <div class="tab-content active" id="tab-inventory">
+          <div class="tab-toolbar">
+            <div class="tab-toolbar-left">
+              <button class="btn-primary btn-sm" type="button" id="refresh-inventory-btn">
+                <i class="ph-light ph-arrows-clockwise"></i>
+                <span data-i18n="minibarRefresh">Actualizar</span>
+              </button>
+            </div>
+            <div class="save-status" id="inv-save-status"></div>
+          </div>
+          <div id="inventory-container">
+            <!-- populated by JS -->
+          </div>
         </div>
+
+        <!-- Tab Content: Register Consumption -->
+        <div class="tab-content" id="tab-consumption">
+          <div class="consumption-summary" id="consumption-summary">
+            <div class="consumption-total-bar">
+              <span class="consumption-total-label" data-i18n="minibarConsTotal">Total consumo:</span>
+              <span class="consumption-total-value" id="consumption-total">$0 COP</span>
+            </div>
+          </div>
+          <div id="consumption-products-container">
+            <!-- populated by JS -->
+          </div>
+          <div class="consumption-actions">
+            <button class="btn-primary" type="button" id="save-consumption-btn">
+              <i class="ph-light ph-floppy-disk"></i>
+              <span data-i18n="minibarConsSave">Guardar consumo</span>
+            </button>
+            <button class="btn-secondary" type="button" id="save-and-send-btn">
+              <i class="ph-light ph-whatsapp-logo"></i>
+              <span data-i18n="minibarConsSaveSend">Guardar y enviar a recepci&oacute;n</span>
+            </button>
+          </div>
+          <div id="consumption-status" class="status"></div>
+        </div>
+
+        <!-- Tab Content: Restock -->
+        <div class="tab-content" id="tab-restock">
+          <p class="tab-description" data-i18n="minibarRestockDesc">Selecciona los productos que deseas reponer y la cantidad a agregar al inventario.</p>
+          <div id="restock-products-container">
+            <!-- populated by JS -->
+          </div>
+          <div class="restock-actions">
+            <button class="btn-primary" type="button" id="save-restock-btn">
+              <i class="ph-light ph-floppy-disk"></i>
+              <span data-i18n="minibarRestockSave">Guardar reposici&oacute;n</span>
+            </button>
+          </div>
+          <div id="restock-status" class="status"></div>
+        </div>
+
+        <!-- Tab Content: Adjust -->
+        <div class="tab-content" id="tab-adjust">
+          <p class="tab-description" data-i18n="minibarAdjustDesc">Corrige manualmente las cantidades de los productos cuando sea necesario.</p>
+          <div id="adjust-products-container">
+            <!-- populated by JS -->
+          </div>
+          <div class="adjust-actions">
+            <button class="btn-primary" type="button" id="save-adjust-btn">
+              <i class="ph-light ph-floppy-disk"></i>
+              <span data-i18n="minibarAdjustSave">Guardar ajuste</span>
+            </button>
+          </div>
+          <div id="adjust-status" class="status"></div>
+        </div>
+
+        <!-- Tab Content: History -->
+        <div class="tab-content" id="tab-history">
+          <div class="tab-toolbar">
+            <button class="btn-primary btn-sm" type="button" id="refresh-history-btn">
+              <i class="ph-light ph-arrows-clockwise"></i>
+              <span data-i18n="minibarRefresh">Actualizar</span>
+            </button>
+          </div>
+          <div id="history-container">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- Tab Content: Reports -->
+        <div class="tab-content" id="tab-reports">
+          <div class="report-filters">
+            <div class="report-filter-group">
+              <label class="report-label" data-i18n="minibarReportFrom">Desde</label>
+              <input type="date" class="report-input" id="report-from" />
+            </div>
+            <div class="report-filter-group">
+              <label class="report-label" data-i18n="minibarReportTo">Hasta</label>
+              <input type="date" class="report-input" id="report-to" />
+            </div>
+            <div class="report-filter-actions">
+              <button class="btn-primary btn-sm" type="button" id="generate-report-btn">
+                <i class="ph-light ph-magnifying-glass"></i>
+                <span data-i18n="minibarReportGenerate">Generar reporte</span>
+              </button>
+              <button class="btn-secondary btn-sm" type="button" id="download-report-pdf-btn">
+                <i class="ph-light ph-file-pdf"></i>
+                <span data-i18n="minibarReportPDF">Exportar PDF</span>
+              </button>
+            </div>
+          </div>
+          <div id="report-result">
+            <!-- populated by JS -->
+          </div>
+          <div id="report-status" class="status"></div>
+        </div>
+
       </section>
     </main>
+  </div>
+
+  <!-- Preview Modal (reused for WhatsApp message) -->
+  <div class="modal-overlay" id="preview-modal" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="modalPreview">Vista previa del resumen</h3>
+        <button class="modal-close-btn" id="close-preview-btn" aria-label="Cerrar">
+          <i class="ph-light ph-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre id="preview-content" class="preview-box">—</pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary btn-sm" id="preview-copy-btn">
+          <i class="ph-light ph-copy"></i>
+          <span data-i18n="modalCopy">Copiar</span>
+        </button>
+        <button class="btn-primary btn-sm" id="preview-send-btn">
+          <i class="ph-light ph-whatsapp-logo"></i>
+          <span data-i18n="modalSend">Enviar</span>
+        </button>
+        <button class="btn-ghost btn-sm" id="close-preview-btn2">
+          <span data-i18n="modalClose">Cerrar</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Navigation Preloader -->
@@ -235,8 +398,8 @@
   <script src="/js/theme.js" defer></script>
   <script src="/js/i18n.js" defer></script>
   <script src="/js/app.js" defer></script>
-  <script src="/js/chatbot.js" defer></script>
   <script src="/js/minibar.js" defer></script>
+  <script src="/js/chatbot.js" defer></script>
   <script>
     (function() {
       var theme = localStorage.getItem("chargeit-theme") || "light";
@@ -244,13 +407,6 @@
       var lang = localStorage.getItem("chargeit-lang") || "es";
       document.documentElement.setAttribute("lang", lang);
 
-      document.getElementById("help-btn")?.addEventListener("click", function(e) {
-        e.preventDefault();
-        var btn = document.getElementById("chatbot-toggle");
-        if (btn) btn.click();
-      });
-
-      // Navigation preloader
       document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
         link.addEventListener("click", function(e) {
           var href = link.getAttribute("href");

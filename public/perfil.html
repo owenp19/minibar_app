@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/app.css" />
@@ -29,6 +29,7 @@
 
         <div class="sidebar-user">
           <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
             <span id="user-initials"></span>
           </div>
           <div class="sidebar-user-info">
@@ -37,42 +38,28 @@
           </div>
         </div>
 
-        <div class="sidebar-quick">
-          <a class="quick-btn" href="/app/ChargeIt">
-            <i class="ri-flashlight-line"></i>
-            <span data-i18n="navNewConsumption">Nuevo consumo</span>
-          </a>
-        </div>
-
         <nav class="sidebar-nav">
-          <a href="/app/ChargeIt" class="nav-item">
-            <i class="ri-shopping-bag-3-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
-          </a>
           <a href="/app/minibar" class="nav-item">
-            <i class="ri-fridge-line nav-icon"></i>
+            <i class="ph-light ph-fridge nav-icon"></i>
             <span class="nav-label" data-i18n="navMinibars">Minibares</span>
           </a>
+          <a href="/app/admin" class="nav-item">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label" data-i18n="navAdmin">Admin</span>
+          </a>
           <a href="/unlock.html" class="nav-item">
-            <i class="ri-key-2-line nav-icon"></i>
+            <i class="ph-light ph-key nav-icon"></i>
             <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
           </a>
           <a href="/perfil" class="nav-item nav-item-active" aria-current="page">
-            <i class="ri-user-3-line nav-icon"></i>
+            <i class="ph-light ph-user nav-icon"></i>
             <span class="nav-label" data-i18n="navProfile">Perfil</span>
           </a>
           <a href="/settings" class="nav-item">
-            <i class="ri-settings-3-line nav-icon"></i>
+            <i class="ph-light ph-gear nav-icon"></i>
             <span class="nav-label" data-i18n="navSettings">Configuración</span>
           </a>
         </nav>
-
-        <div class="sidebar-nav" style="margin-top:auto">
-          <a href="#" class="nav-item" id="help-btn">
-            <i class="ri-question-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
-          </a>
-        </div>
 
         <div class="sidebar-credit">
           <span data-i18n="footerVersion">v1.0.1</span><br>
@@ -83,7 +70,7 @@
       <div class="sidebar-bottom">
         <form action="/api/auth/logout" method="POST" class="sidebar-nav">
           <button type="submit" class="nav-item nav-item-danger">
-            <i class="ri-logout-box-line nav-icon"></i>
+            <i class="ph-light ph-sign-out nav-icon"></i>
             <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
           </button>
         </form>
@@ -93,14 +80,14 @@
     <main class="main-panel">
       <header class="main-header">
         <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
-          <i class="ri-menu-line"></i>
+          <i class="ph-light ph-list"></i>
         </button>
 
         <div class="main-header-title">
           <div class="breadcrumb">
-            <i class="ri-home-5-line"></i>
+            <i class="ph-light ph-house"></i>
             <span data-i18n="breadcrumbHome">Minibar</span>
-            <i class="ri-arrow-right-s-line"></i>
+            <i class="ph-light ph-caret-right"></i>
             <strong data-i18n="profileTitle">Perfil</strong>
           </div>
 
@@ -111,10 +98,10 @@
         <div class="header-controls">
           <div class="theme-toggle-group" id="app-theme-switcher">
             <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
-              <i class="ri-sun-line"></i>
+              <i class="ph-light ph-sun"></i>
             </button>
             <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
-              <i class="ri-moon-line"></i>
+              <i class="ph-light ph-moon"></i>
             </button>
           </div>
           <div class="header-lang-group" id="app-lang-selector">
@@ -133,7 +120,7 @@
               <span id="profile-initials">OP</span>
             </div>
             <div class="profile-avatar-overlay" id="profile-avatar-overlay" title="Cambiar foto">
-              <i class="ri-camera-line"></i>
+              <i class="ph-light ph-camera"></i>
             </div>
             <input type="file" id="profile-photo-input" accept="image/*" />
           </div>
@@ -163,7 +150,7 @@
 
           <div class="profile-actions">
             <button class="btn-primary" type="button" id="profile-save-btn">
-              <i class="ri-save-3-line"></i>
+              <i class="ph-light ph-floppy-disk"></i>
               <span data-i18n="profileSave">Guardar cambios</span>
             </button>
           </div>
@@ -196,12 +183,6 @@
       document.documentElement.setAttribute("data-theme", theme);
       var lang = localStorage.getItem("chargeit-lang") || "es";
       document.documentElement.setAttribute("lang", lang);
-
-      document.getElementById("help-btn")?.addEventListener("click", function(e) {
-        e.preventDefault();
-        var btn = document.getElementById("chatbot-toggle");
-        if (btn) btn.click();
-      });
 
       // Navigation preloader
       document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {

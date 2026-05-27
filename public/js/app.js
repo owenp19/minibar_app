@@ -45,6 +45,7 @@ function getInitialsFromName(fullName) {
 async function loadCurrentUser() {
   const nameEl = $("user-name");
   const initialsEl = $("user-initials");
+  const avatarImg = $("user-avatar-img");
   if (!nameEl || !initialsEl) return;
 
   try {
@@ -55,6 +56,11 @@ async function loadCurrentUser() {
     if (fullName) {
       nameEl.textContent = fullName;
       initialsEl.textContent = getInitialsFromName(fullName);
+    }
+    if (avatarImg && data.avatarUrl) {
+      avatarImg.src = data.avatarUrl;
+      avatarImg.style.display = "";
+      initialsEl.style.display = "none";
     }
   } catch (err) {
     console.error("Error cargando usuario actual:", err);

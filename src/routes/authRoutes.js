@@ -135,14 +135,28 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/me", requireLogin, (req, res) => {
-  const user = req.session.user;
-  res.json({
-    id: user.id,
-    email: user.email,
-    fullName: user.fullName,
-    role: user.role
-  });
+router.get("/me", requireLogin, async (req, res, next) => {
+  try {
+    const pool = getDbPool();
+    const [rows] = await pool.query(
+      "SELECT id, full_name, email, phone, avatar_url, role FROM users WHERE id = ? LIMIT 1",
+      [req.session.user.id]
+    );
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    const user = rows[0];
+    res.json({
+      id: user.id,
+      fullName: user.full_name,
+      email: user.email,
+      phone: user.phone || "",
+      avatarUrl: user.avatar_url || "",
+      role: user.role
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // GET /api/auth/profile — get current user profile with photo

@@ -61,7 +61,7 @@
   async function saveProfile() {
     const saveBtn = $("profile-save-btn");
     const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="ri-loader-4-line spinning"></i> <span data-i18n="profileSaving">Guardando…</span>';
+    saveBtn.innerHTML = '<i class="ph-light ph-spinner spinning"></i> <span data-i18n="profileSaving">Guardando…</span>';
     saveBtn.disabled = true;
     setStatus("", "");
 

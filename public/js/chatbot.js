@@ -46,13 +46,13 @@ const FAQ = [
   container.innerHTML = `
     <link rel="stylesheet" href="/css/chatbot.css">
     <button class="chatbot-btn" id="chatbot-toggle" aria-label="Abrir chat de ayuda">
-      <img src="/images/Logo_Nattivo_v1.png" alt="Ayuda" class="chatbot-btn-img" />
+      <img src="/images/chatbot_minibar.png" alt="Ayuda" class="chatbot-btn-img" />
     </button>
     <div class="chatbot-panel" id="chatbot-panel">
       <div class="chatbot-header">
         <div class="chatbot-header-left">
           <div class="chatbot-header-avatar">
-            <i class="ri-customer-service-2-line"></i>
+            <i class="ph-light ph-headset"></i>
           </div>
           <div>
             <h3>Asistente Minibar</h3>
@@ -61,10 +61,10 @@ const FAQ = [
         </div>
         <div class="chatbot-header-actions">
           <button class="chatbot-header-btn" id="chatbot-clear" title="Borrar conversación" aria-label="Borrar conversación">
-            <i class="ri-delete-bin-6-line"></i>
+            <i class="ph-light ph-trash"></i>
           </button>
           <button class="chatbot-header-btn" id="chatbot-close" title="Cerrar" aria-label="Cerrar chat">
-            <i class="ri-close-line"></i>
+            <i class="ph-light ph-x"></i>
           </button>
         </div>
       </div>
@@ -83,7 +83,7 @@ const FAQ = [
       <div class="chatbot-input-area">
         <input class="chatbot-input" id="chatbot-input" type="text" placeholder="Escribe tu pregunta…" />
         <button class="chatbot-send" id="chatbot-send" aria-label="Enviar">
-          <i class="ri-send-plane-2-line"></i>
+          <i class="ph-light ph-paper-plane-right"></i>
         </button>
       </div>
     </div>

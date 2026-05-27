@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/app.css" />
@@ -41,6 +41,7 @@
 
         <div class="sidebar-user">
           <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
             <span id="user-initials"></span>
           </div>
           <div class="sidebar-user-info">
@@ -49,42 +50,28 @@
           </div>
         </div>
 
-        <div class="sidebar-quick">
-          <a class="quick-btn" href="/app/ChargeIt" aria-current="page">
-            <i class="ri-flashlight-line"></i>
-            <span data-i18n="navNewConsumption">Nuevo consumo</span>
-          </a>
-        </div>
-
         <nav class="sidebar-nav">
-          <a href="/app/ChargeIt" class="nav-item nav-item-active" aria-current="page">
-            <i class="ri-shopping-bag-3-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
-          </a>
-          <a href="/app/minibar" class="nav-item">
-            <i class="ri-fridge-line nav-icon"></i>
+          <a href="/app/minibar" class="nav-item nav-item-active" aria-current="page">
+            <i class="ph-light ph-fridge nav-icon"></i>
             <span class="nav-label" data-i18n="navMinibars">Minibares</span>
           </a>
+          <a href="/app/admin" class="nav-item">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label" data-i18n="navAdmin">Admin</span>
+          </a>
           <a href="/unlock.html" class="nav-item">
-            <i class="ri-key-2-line nav-icon"></i>
+            <i class="ph-light ph-key nav-icon"></i>
             <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
           </a>
           <a href="/perfil" class="nav-item">
-            <i class="ri-user-3-line nav-icon"></i>
+            <i class="ph-light ph-user nav-icon"></i>
             <span class="nav-label" data-i18n="navProfile">Perfil</span>
           </a>
           <a href="/settings" class="nav-item">
-            <i class="ri-settings-3-line nav-icon"></i>
+            <i class="ph-light ph-gear nav-icon"></i>
             <span class="nav-label" data-i18n="navSettings">Configuración</span>
           </a>
         </nav>
-
-        <div class="sidebar-nav" style="margin-top:auto">
-          <a href="#" class="nav-item" id="help-btn">
-            <i class="ri-question-line nav-icon"></i>
-            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
-          </a>
-        </div>
 
         <div class="sidebar-credit">
           <span data-i18n="footerVersion">v1.0.1</span><br>
@@ -95,7 +82,7 @@
       <div class="sidebar-bottom">
         <form action="/api/auth/logout" method="POST" class="sidebar-nav">
           <button type="submit" class="nav-item nav-item-danger">
-            <i class="ri-logout-box-line nav-icon"></i>
+            <i class="ph-light ph-sign-out nav-icon"></i>
             <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
           </button>
         </form>
@@ -105,14 +92,14 @@
     <main class="main-panel">
       <header class="main-header">
         <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
-          <i class="ri-menu-line"></i>
+          <i class="ph-light ph-list"></i>
         </button>
 
         <div class="main-header-title">
           <div class="breadcrumb">
-            <i class="ri-home-5-line"></i>
+            <i class="ph-light ph-house"></i>
             <span data-i18n="breadcrumbHome">Minibar</span>
-            <i class="ri-arrow-right-s-line"></i>
+            <i class="ph-light ph-caret-right"></i>
             <strong data-i18n="breadcrumbConsumption">Consumo</strong>
           </div>
 
@@ -126,10 +113,10 @@
         <div class="header-controls">
           <div class="theme-toggle-group" id="app-theme-switcher">
             <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
-              <i class="ri-sun-line"></i>
+              <i class="ph-light ph-sun"></i>
             </button>
             <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
-              <i class="ri-moon-line"></i>
+              <i class="ph-light ph-moon"></i>
             </button>
           </div>
           <div class="header-lang-group" id="app-lang-selector">
@@ -142,7 +129,7 @@
       <!-- KPI Row -->
       <section class="kpi-row" aria-label="Resumen">
         <div class="kpi-card">
-          <div class="kpi-icon"><i class="ri-hotel-bed-line"></i></div>
+          <div class="kpi-icon"><i class="ph-light ph-bed"></i></div>
           <div class="kpi-info">
             <div class="kpi-label" data-i18n="kpiRoom">Habitación</div>
             <div class="kpi-value" id="kpi-room">—</div>
@@ -150,7 +137,7 @@
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon"><i class="ri-shopping-cart-2-line"></i></div>
+          <div class="kpi-icon"><i class="ph-light ph-shopping-cart"></i></div>
           <div class="kpi-info">
             <div class="kpi-label" data-i18n="kpiItems">Items</div>
             <div class="kpi-value" id="kpi-items">0</div>
@@ -158,7 +145,7 @@
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon"><i class="ri-cash-line"></i></div>
+          <div class="kpi-icon"><i class="ph-light ph-coin"></i></div>
           <div class="kpi-info">
             <div class="kpi-label" data-i18n="kpiTotal">Total</div>
             <div class="kpi-value" id="kpi-total">$0</div>
@@ -166,7 +153,7 @@
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon"><i class="ri-time-line"></i></div>
+          <div class="kpi-icon"><i class="ph-light ph-clock"></i></div>
           <div class="kpi-info">
             <div class="kpi-label" data-i18n="kpiLastAction">Última acción</div>
             <div class="kpi-value" id="kpi-time">—</div>
@@ -184,7 +171,7 @@
 
           <div class="card-head-actions">
             <button class="btn-secondary" type="button" id="clear-btn">
-              <i class="ri-eraser-line"></i>
+              <i class="ph-light ph-eraser"></i>
               <span data-i18n="consumptionClear">Limpiar</span>
             </button>
           </div>
@@ -201,12 +188,12 @@
                 </select>
 
                 <button class="btn-ghost" type="button" id="refresh-rooms-btn" aria-label="Actualizar habitaciones">
-                  <i class="ri-refresh-line"></i>
+                  <i class="ph-light ph-arrows-clockwise"></i>
                 </button>
               </div>
 
               <div class="helper-text">
-                <i class="ri-information-line"></i>
+                <i class="ph-light ph-info"></i>
                 <span data-i18n="consumptionRoomTip">Tip: primero selecciona la habitación para habilitar el listado de productos.</span>
               </div>
             </div>
@@ -217,16 +204,16 @@
 
                 <div class="section-tools">
                   <div class="search-box">
-                    <i class="ri-search-line"></i>
+                    <i class="ph-light ph-magnifying-glass"></i>
                     <input id="product-search" type="text" data-i18n-placeholder="consumptionSearch" placeholder="Buscar producto…" />
                   </div>
 
                   <button class="btn-ghost" type="button" id="select-all-btn" data-i18n-title="consumptionSelectAll" title="Seleccionar todo">
-                    <i class="ri-check-double-line"></i>
+                    <i class="ph-light ph-checks"></i>
                   </button>
 
                   <button class="btn-ghost" type="button" id="unselect-all-btn" data-i18n-title="consumptionUnselectAll" title="Quitar selección">
-                    <i class="ri-close-circle-line"></i>
+                    <i class="ph-light ph-x-circle"></i>
                   </button>
                 </div>
               </div>
@@ -234,7 +221,7 @@
               <div id="products-list" class="products-list" aria-label="Listado de productos"></div>
 
               <div class="helper-text">
-                <i class="ri-shield-check-line"></i>
+                <i class="ph-light ph-shield-check"></i>
                 <span data-i18n="consumptionTotalHint">El total se calcula automáticamente según cantidades seleccionadas.</span>
               </div>
             </div>
@@ -251,7 +238,7 @@
                   </p>
                 </div>
                 <span class="pill">
-                  <i class="ri-file-pdf-2-line"></i>
+                  <i class="ph-light ph-file-pdf"></i>
                   PDF
                 </span>
               </div>
@@ -268,7 +255,7 @@
                 </div>
 
                 <button id="download-report-btn" class="btn-report" type="button">
-                  <i class="ri-file-download-line"></i>
+                  <i class="ph-light ph-download-simple"></i>
                   <span data-i18n="consumptionReportDownload">Descargar PDF</span>
                 </button>
               </div>
@@ -280,24 +267,24 @@
               <label for="note" data-i18n="consumptionNote">Nota (opcional)</label>
               <textarea id="note" rows="3" data-i18n-placeholder="consumptionNotePlaceholder" placeholder="Ej: salida tardía, consumo extra, minibar incompleto, etc."></textarea>
               <div class="helper-text">
-                <i class="ri-chat-1-line"></i>
+                <i class="ph-light ph-chats-circle"></i>
                 <span data-i18n="consumptionNoteHint">Esta nota se incluirá en el resumen enviado a recepción.</span>
               </div>
             </div>
 
             <div class="actions">
               <button id="submit-btn" class="btn-primary" type="button">
-                <i class="ri-whatsapp-line"></i>
+                <i class="ph-light ph-whatsapp-logo"></i>
                 <span data-i18n="consumptionSend">Enviar a recepción</span>
               </button>
 
               <div class="action-row">
                 <button id="preview-btn" class="btn-secondary" type="button">
-                  <i class="ri-eye-line"></i>
+                  <i class="ph-light ph-eye"></i>
                   <span data-i18n="consumptionPreview">Vista previa</span>
                 </button>
                 <button id="copy-btn" class="btn-secondary" type="button">
-                  <i class="ri-file-copy-line"></i>
+                  <i class="ph-light ph-copy"></i>
                   <span data-i18n="consumptionCopy">Copiar resumen</span>
                 </button>
               </div>
@@ -305,7 +292,7 @@
               <div id="status" class="status"></div>
 
               <div class="disclaimer">
-                <i class="ri-lock-2-line"></i>
+                <i class="ph-light ph-lock"></i>
                 <span data-i18n="consumptionVerify">Verifica habitación y total antes de enviar.</span>
               </div>
             </div>
@@ -319,7 +306,7 @@
           <div class="modal-head">
             <h3 id="preview-title" data-i18n="modalPreview">Vista previa del resumen</h3>
             <button class="btn-ghost" type="button" id="close-preview-btn" data-i18n-aria="modalClose" aria-label="Cerrar">
-              <i class="ri-close-line"></i>
+              <i class="ph-light ph-x"></i>
             </button>
           </div>
           <div class="modal-body">
@@ -327,11 +314,11 @@
           </div>
           <div class="modal-actions">
             <button class="btn-secondary" type="button" id="preview-copy-btn">
-              <i class="ri-file-copy-line"></i>
+              <i class="ph-light ph-copy"></i>
               <span data-i18n="modalCopy">Copiar</span>
             </button>
             <button class="btn-primary" type="button" id="preview-send-btn">
-              <i class="ri-whatsapp-line"></i>
+              <i class="ph-light ph-whatsapp-logo"></i>
               <span data-i18n="modalSend">Enviar</span>
             </button>
           </div>
@@ -368,12 +355,6 @@
         var preloader = document.getElementById("preloader");
         if (preloader) preloader.classList.add("hidden");
       }, 300);
-
-      document.getElementById("help-btn")?.addEventListener("click", function(e) {
-        e.preventDefault();
-        var btn = document.getElementById("chatbot-toggle");
-        if (btn) btn.click();
-      });
 
       // Navigation preloader
       document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {

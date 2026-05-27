@@ -4,7 +4,6 @@ const SHELL = [
   "/",
   "/login.html",
   "/registro.html",
-  "/index.html",
   "/minibar.html",
   "/unlock.html",
   "/settings.html",
@@ -25,7 +24,9 @@ const SHELL = [
   "/icons/icon-512.svg",
   "/images/Logo_Nattivo_v1.png",
   "/images/Logo_Nattivo_v2.png",
-  "/images/mujer_isle%C3%B1a.png"
+  "/images/mujer_isle%C3%B1a.png",
+  "/css/chatbot.css",
+  "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css"
 ];
 
 self.addEventListener("install", (event) => {

@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const session = require("express-session");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const { initDbPool } = require("./config/db");
 const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
 
@@ -10,11 +12,17 @@ const roomRoutes = require("./routes/roomRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");
 const authRoutes = require("./routes/authRoutes");
 const minibarRoutes = require("./routes/minibarRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 function createApp() {
   initDbPool();
 
   const app = express();
+
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+  }));
 
   app.use(
     cors({
@@ -22,16 +30,33 @@ function createApp() {
       credentials: true
     })
   );
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ extended: false, limit: "1mb" }));
+
+  const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Demasiadas solicitudes. Intenta de nuevo en un minuto." }
+  });
+  app.use("/api/", apiLimiter);
+
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret || sessionSecret.length < 16) {
+    console.warn("ADVERTENCIA: SESSION_SECRET débil o no configurado. Usa una clave de 32+ caracteres en .env");
+  }
 
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "minibar-super-secret",
+      secret: sessionSecret || "chargeit-default-secret-change-in-production",
       resave: false,
       saveUninitialized: false,
       cookie: {
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 8
       }
     })
   );
@@ -39,6 +64,16 @@ function createApp() {
   function requireLogin(req, res, next) {
     if (!req.session.user) {
       return res.redirect("/");
+    }
+    next();
+  }
+
+  function requireAdmin(req, res, next) {
+    if (!req.session.user) {
+      return res.redirect("/");
+    }
+    if (req.session.user.role !== "admin") {
+      return res.status(403).json({ error: "Acceso denegado. Se requiere rol de administrador." });
     }
     next();
   }
@@ -357,11 +392,11 @@ function createApp() {
   });
 
   app.get("/app", requireLogin, (req, res) => {
-    res.redirect("/app/ChargeIt");
+    res.redirect("/app/minibar");
   });
 
   app.get("/app/ChargeIt", requireLogin, (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+    res.redirect("/app/minibar");
   });
 
   app.get("/perfil", requireLogin, (req, res) => {
@@ -389,6 +424,11 @@ function createApp() {
   app.use("/api/rooms", requireLogin, roomRoutes);
   app.use("/api/consumptions", requireLogin, consumptionRoutes);
   app.use("/api/minibar", requireLogin, minibarRoutes);
+  app.use("/api/admin", requireAdmin, adminRoutes);
+
+  app.get("/app/admin", requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "admin.html"));
+  });
 
   app.use(notFoundHandler);
   app.use(errorHandler);

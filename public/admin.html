@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="adminTitle">Admin – ChargeIt Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
+            <span id="user-initials"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Admin</div>
+            <div class="sidebar-user-role" data-i18n="hotelName">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/minibar" class="nav-item">
+            <i class="ph-light ph-fridge nav-icon"></i>
+            <span class="nav-label" data-i18n="navMinibars">Minibares</span>
+          </a>
+          <a href="/app/admin" class="nav-item nav-item-active" aria-current="page">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label">Admin</span>
+          </a>
+          <a href="/unlock.html" class="nav-item">
+            <i class="ph-light ph-key nav-icon"></i>
+            <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
+          </a>
+          <a href="/perfil" class="nav-item">
+            <i class="ph-light ph-user nav-icon"></i>
+            <span class="nav-label" data-i18n="navProfile">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ph-light ph-gear nav-icon"></i>
+            <span class="nav-label" data-i18n="navSettings">Configuraci&oacute;n</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-credit">
+          <span data-i18n="footerVersion">v1.0.1</span><br>
+          <span data-i18n="footerDeveloped">Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ph-light ph-sign-out nav-icon"></i>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesi&oacute;n</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir men&uacute;">
+          <i class="ph-light ph-list"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div id="breadcrumb">
+            <span class="crumb">
+              <i class="ph-light ph-house"></i>
+              <span class="crumb-current">Admin</span>
+            </span>
+          </div>
+
+          <h1>
+            <i class="ph-light ph-shield-check admin-header-icon"></i>
+            <span>Panel de Administraci&oacute;n</span>
+          </h1>
+
+          <p id="page-description">
+            Gestiona productos, categor&iacute;as, pisos, habitaciones y usuarios del sistema.
+          </p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ph-light ph-sun"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ph-light ph-moon"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Admin Tabs -->
+      <section class="card view-section active">
+        <div class="admin-tabs" id="admin-tabs">
+          <button class="admin-tab active" data-section="dashboard">
+            <i class="ph-light ph-layout"></i>
+            <span>Dashboard</span>
+          </button>
+          <button class="admin-tab" data-section="products">
+            <i class="ph-light ph-shopping-bag"></i>
+            <span>Productos</span>
+          </button>
+          <button class="admin-tab" data-section="categories">
+            <i class="ph-light ph-tag"></i>
+            <span>Categor&iacute;as</span>
+          </button>
+          <button class="admin-tab" data-section="floors">
+            <i class="ph-light ph-buildings"></i>
+            <span>Pisos</span>
+          </button>
+          <button class="admin-tab" data-section="rooms">
+            <i class="ph-light ph-bed"></i>
+            <span>Habitaciones</span>
+          </button>
+          <button class="admin-tab" data-section="users">
+            <i class="ph-light ph-user"></i>
+            <span>Usuarios</span>
+          </button>
+        </div>
+
+        <!-- Section: Dashboard -->
+        <div class="admin-section active" id="section-dashboard">
+          <div id="admin-dashboard-content">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+
+        <!-- Section: Products -->
+        <div class="admin-section" id="section-products">
+          <div class="admin-toolbar">
+            <button class="btn-primary btn-sm" id="admin-add-product-btn">
+              <i class="ph-light ph-plus"></i> <span>Nuevo producto</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="admin-refresh-products-btn">
+              <i class="ph-light ph-arrows-clockwise"></i> <span>Actualizar</span>
+            </button>
+          </div>
+          <div id="admin-products-list">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+
+        <!-- Section: Categories -->
+        <div class="admin-section" id="section-categories">
+          <div class="admin-toolbar">
+            <button class="btn-primary btn-sm" id="admin-add-category-btn">
+              <i class="ph-light ph-plus"></i> <span>Nueva categor&iacute;a</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="admin-refresh-categories-btn">
+              <i class="ph-light ph-arrows-clockwise"></i> <span>Actualizar</span>
+            </button>
+          </div>
+          <div id="admin-categories-list">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+
+        <!-- Section: Floors -->
+        <div class="admin-section" id="section-floors">
+          <div class="admin-toolbar">
+            <button class="btn-primary btn-sm" id="admin-add-floor-btn">
+              <i class="ph-light ph-plus"></i> <span>Nuevo piso</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="admin-refresh-floors-btn">
+              <i class="ph-light ph-arrows-clockwise"></i> <span>Actualizar</span>
+            </button>
+          </div>
+          <div id="admin-floors-list">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+
+        <!-- Section: Rooms -->
+        <div class="admin-section" id="section-rooms">
+          <div class="admin-toolbar">
+            <button class="btn-primary btn-sm" id="admin-add-room-btn">
+              <i class="ph-light ph-plus"></i> <span>Nueva habitaci&oacute;n</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="admin-refresh-rooms-btn">
+              <i class="ph-light ph-arrows-clockwise"></i> <span>Actualizar</span>
+            </button>
+          </div>
+          <div id="admin-rooms-list">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+
+        <!-- Section: Users -->
+        <div class="admin-section" id="section-users">
+          <div class="admin-toolbar">
+            <button class="btn-primary btn-sm" id="admin-add-user-btn">
+              <i class="ph-light ph-plus"></i> <span>Nuevo usuario</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="admin-refresh-users-btn">
+              <i class="ph-light ph-arrows-clockwise"></i> <span>Actualizar</span>
+            </button>
+          </div>
+          <div id="admin-users-list">
+            <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Admin modals (product/category/floor/room/user) are built dynamically -->
+
+  <!-- Navigation Preloader -->
+  <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
+    <div class="nav-preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <div class="nav-preloader-bar">
+        <div class="nav-preloader-fill"></div>
+      </div>
+      <span class="nav-preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
+  <script src="/js/theme.js" defer></script>
+  <script src="/js/i18n.js" defer></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/admin.js" defer></script>
+  <script src="/js/chatbot.js" defer></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem("chargeit-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      var lang = localStorage.getItem("chargeit-lang") || "es";
+      document.documentElement.setAttribute("lang", lang);
+
+      document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
+        link.addEventListener("click", function(e) {
+          var href = link.getAttribute("href");
+          if (!href || href === "#" || href.startsWith("http") || href.startsWith("//") || href.startsWith("/api")) return;
+          e.preventDefault();
+          var preloader = document.getElementById("nav-preloader");
+          if (preloader) {
+            preloader.classList.remove("hidden");
+            preloader.classList.add("visible");
+          }
+          setTimeout(function() {
+            window.location.href = href;
+          }, 400);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
