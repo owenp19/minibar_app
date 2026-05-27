@@ -1,20 +1,16 @@
-const { getDbPool } = require("../config/db");
+const db = require("../config/db");
 
 async function getAllRooms() {
-  const pool = getDbPool();
-
-  const [rows] = await pool.query(
-    `SELECT 
-        h.id_habitacion AS id,
-        h.numero AS roomNumber,
-        p.id_piso AS floorId,
-        p.nombre AS floorName
-     FROM habitaciones h
-     INNER JOIN pisos p ON p.id_piso = h.id_piso
-     ORDER BY p.id_piso, h.numero`
+  return await db.query(
+    `SELECT
+        r.id,
+        r.room_number AS roomNumber,
+        f.id AS floorId,
+        f.name AS floorName
+     FROM rooms r
+     INNER JOIN floors f ON f.id = r.floor_id
+     ORDER BY f.floor_number, CAST(r.room_number AS UNSIGNED)`
   );
-
-  return rows;
 }
 
 module.exports = {

@@ -9,6 +9,7 @@ const productRoutes = require("./routes/productRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");
 const authRoutes = require("./routes/authRoutes");
+const minibarRoutes = require("./routes/minibarRoutes");
 
 function createApp() {
   initDbPool();
@@ -48,11 +49,6 @@ function createApp() {
 
   app.use(express.static(path.join(__dirname, "..", "public")));
 
-  app.use(
-    "/static",
-    express.static(path.join(__dirname, "..", "public"))
-  );
-
   app.get("/api", (req, res) => {
     res.send(`
       <!DOCTYPE html>
@@ -79,7 +75,7 @@ function createApp() {
               </div>
               <div class="brand">
                 <img 
-                  src="/static/images/Logo_Nattivo_v2.png"
+                  src="/images/Logo_Nattivo_v2.png"
                   alt="Logo del hotel" 
                 />
               </div>
@@ -365,7 +361,19 @@ function createApp() {
   });
 
   app.get("/app/ChargeIt", requireLogin, (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "public", "chargeit-minibar.html"));
+    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+  });
+
+  app.get("/perfil", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "perfil.html"));
+  });
+
+  app.get("/settings", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "settings.html"));
+  });
+
+  app.get("/app/minibar", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "minibar.html"));
   });
 
   app.get("/api/health", (req, res) => {
@@ -380,6 +388,7 @@ function createApp() {
   app.use("/api/products", requireLogin, productRoutes);
   app.use("/api/rooms", requireLogin, roomRoutes);
   app.use("/api/consumptions", requireLogin, consumptionRoutes);
+  app.use("/api/minibar", requireLogin, minibarRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

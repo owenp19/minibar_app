@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title data-i18n="unlockTitle">Desbloqueo – ChargeIt Hotel</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <span id="user-initials">OP</span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Usuario</div>
+            <div class="sidebar-user-role" data-i18n="hotelName">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <div class="sidebar-quick">
+          <a class="quick-btn" href="/app/ChargeIt">
+            <i class="ri-flashlight-line"></i>
+            <span data-i18n="navNewConsumption">Nuevo consumo</span>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/ChargeIt" class="nav-item">
+            <i class="ri-shopping-bag-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
+          </a>
+          <a href="/app/minibar" class="nav-item">
+            <i class="ri-fridge-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navMinibars">Minibares</span>
+          </a>
+          <a href="/unlock.html" class="nav-item nav-item-active" aria-current="page">
+            <i class="ri-key-2-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
+          </a>
+          <a href="/perfil" class="nav-item">
+            <i class="ri-user-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navProfile">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ri-settings-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navSettings">Configuración</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-nav" style="margin-top:auto">
+          <a href="#" class="nav-item" id="help-btn">
+            <i class="ri-question-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
+          </a>
+        </div>
+
+        <div class="sidebar-credit">
+          <span data-i18n="footerVersion">v1.0.1</span><br>
+          <span data-i18n="footerDeveloped">Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ri-logout-box-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="ri-menu-line"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div class="breadcrumb">
+            <i class="ri-home-5-line"></i>
+            <span data-i18n="breadcrumbMinibars">Minibar</span>
+            <i class="ri-arrow-right-s-line"></i>
+            <strong data-i18n="breadcrumbUnlock">Desbloqueo</strong>
+          </div>
+
+          <h1 data-i18n="unlockTitle">Desbloqueo de habitación</h1>
+          <p data-i18n="unlockDesc">Selecciona una o varias habitaciones y genera el mensaje para WhatsApp.</p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ri-sun-line"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ri-moon-line"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" data-i18n="unlockSelectRooms">Selección de habitaciones</h2>
+            <p class="card-subtitle" data-i18n="unlockSelectRoomsDesc">Puedes seleccionar múltiples habitaciones.</p>
+          </div>
+
+          <div class="card-head-actions">
+            <button class="btn-secondary" type="button" id="unlock-refresh-rooms-btn">
+              <i class="ri-refresh-line"></i>
+              <span data-i18n="unlockRefresh">Recargar</span>
+            </button>
+            <button class="btn-ghost" type="button" id="unlock-select-all-btn">
+              <i class="ri-check-double-line"></i>
+              <span data-i18n="unlockSelectAll">Seleccionar todas</span>
+            </button>
+            <button class="btn-ghost" type="button" id="unlock-clear-selection-btn">
+              <i class="ri-close-circle-line"></i>
+              <span data-i18n="unlockClear">Limpiar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-column">
+            <div class="form-section">
+              <label for="rooms-multi" data-i18n="unlockRooms">Habitaciones</label>
+
+              <select id="rooms-multi" multiple size="10"></select>
+
+              <div class="helper-text">
+                <i class="ri-information-line"></i>
+                <span data-i18n="unlockMultiTip">Tip: En Windows usa Ctrl para seleccionar varias. En Mac usa Cmd.</span>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <label for="unlock-note" data-i18n="unlockNote">Nota (opcional)</label>
+              <textarea id="unlock-note" data-i18n-placeholder="unlockNotePlaceholder" placeholder="Ej: Favor desbloquear folio por mantenimiento."></textarea>
+            </div>
+
+            <div class="actions">
+              <div class="action-row">
+                <button class="btn-secondary" type="button" id="unlock-preview-btn">
+                  <i class="ri-eye-line"></i>
+                  <span data-i18n="unlockPreview">Vista previa</span>
+                </button>
+
+                <button class="btn-ghost" type="button" id="unlock-copy-btn">
+                  <i class="ri-file-copy-line"></i>
+                  <span data-i18n="unlockCopy">Copiar</span>
+                </button>
+              </div>
+
+              <button class="btn-primary" type="button" id="unlock-send-btn">
+                <i class="ri-send-plane-2-line"></i>
+                <span data-i18n="unlockSend">Enviar por WhatsApp</span>
+              </button>
+
+              <div class="status" id="unlock-status"></div>
+            </div>
+          </div>
+
+          <div class="form-column-side">
+            <div class="report-card">
+              <div class="report-head">
+                <div>
+                  <h2 data-i18n="unlockSummary">Resumen</h2>
+                  <p class="summary-text-report" data-i18n="unlockSummaryDesc">Se genera con fecha y hora.</p>
+                </div>
+                <span class="pill">
+                  <i class="ri-lock-unlock-line"></i>
+                  <span data-i18n="breadcrumbUnlock">Desbloqueo</span>
+                </span>
+              </div>
+
+              <div class="preview-box" id="unlock-preview-box">—</div>
+
+              <div class="helper-text">
+                <i class="ri-whatsapp-line"></i>
+                <span data-i18n="unlockWhatsappHint">Si el número está vacío, WhatsApp te deja elegir el contacto.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal preview -->
+      <div class="modal" id="preview-modal" aria-hidden="true">
+        <div class="modal-card">
+          <div class="modal-head">
+            <h3 data-i18n="modalPreviewUnlock">Vista previa del mensaje</h3>
+            <button class="btn-ghost" type="button" id="close-preview-btn">
+              <i class="ri-close-line"></i>
+              <span data-i18n="modalClose">Cerrar</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <pre class="preview-box" id="preview-content">—</pre>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-ghost" type="button" id="preview-copy-btn">
+              <i class="ri-file-copy-line"></i>
+              <span data-i18n="modalCopy">Copiar</span>
+            </button>
+            <button class="btn-primary" type="button" id="preview-send-btn">
+              <i class="ri-send-plane-2-line"></i>
+              <span data-i18n="modalSend">Enviar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Navigation Preloader -->
+  <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
+    <div class="nav-preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <div class="nav-preloader-bar">
+        <div class="nav-preloader-fill"></div>
+      </div>
+      <span class="nav-preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
+  <script src="/js/theme.js" defer></script>
+  <script src="/js/i18n.js" defer></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/chatbot.js" defer></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem("chargeit-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      var lang = localStorage.getItem("chargeit-lang") || "es";
+      document.documentElement.setAttribute("lang", lang);
+
+      document.getElementById("help-btn")?.addEventListener("click", function(e) {
+        e.preventDefault();
+        var btn = document.getElementById("chatbot-toggle");
+        if (btn) btn.click();
+      });
+
+      // Navigation preloader
+      document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
+        link.addEventListener("click", function(e) {
+          var href = link.getAttribute("href");
+          if (!href || href === "#" || href.startsWith("http") || href.startsWith("//") || href.startsWith("/api")) return;
+          e.preventDefault();
+          var preloader = document.getElementById("nav-preloader");
+          if (preloader) {
+            preloader.classList.remove("hidden");
+            preloader.classList.add("visible");
+          }
+          setTimeout(function() {
+            window.location.href = href;
+          }, 400);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

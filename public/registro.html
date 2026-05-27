@@ -5,19 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="appName">ChargeIt Hotel</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-  <!-- Remix Icons -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/login.css" />
 
-  <!-- Favicon -->
+  <style>
+    #register-submit { margin-top: 8px; }
+    #register-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+    .link-button { background: none; border: none; color: var(--color-primary); font-weight: 600; text-decoration: none; cursor: pointer; font-size: 0.95rem; padding: 0; font-family: var(--font-text); }
+    .link-button:hover { text-decoration: underline; }
+  </style>
+
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -28,24 +31,22 @@
 <body>
   <div class="login-page">
     <section class="login-panel">
-      <!-- Top bar: Theme + Language -->
       <div class="login-top-bar">
-        <div class="theme-toggle-group" id="login-theme-switcher">
-          <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Cambiar a modo claro" title="Cambiar a modo claro">
+        <div class="theme-toggle-group" id="register-theme-switcher">
+          <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Cambiar a modo claro">
             <i class="ri-sun-line"></i>
           </button>
-          <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+          <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Cambiar a modo oscuro">
             <i class="ri-moon-line"></i>
           </button>
         </div>
 
-        <div class="header-lang-group" id="login-lang-selector">
+        <div class="header-lang-group" id="register-lang-selector">
           <button class="header-lang-btn" data-lang="es">ES</button>
           <button class="header-lang-btn" data-lang="en">EN</button>
         </div>
       </div>
 
-      <!-- Brand -->
       <div class="login-brand">
         <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="login-brand-logo" />
         <div class="login-brand-silhouette"></div>
@@ -55,71 +56,54 @@
         </div>
       </div>
 
-      <!-- Header -->
       <header class="login-header">
-        <h1 data-i18n="loginTitle">Iniciar sesión</h1>
-        <p data-i18n="loginSubtitle">Ingresa con tu correo corporativo y contraseña.</p>
+        <h1 data-i18n="registerTitle">Crear cuenta</h1>
+        <p data-i18n="registerSubtitle">Regístrate para gestionar el minibar del hotel.</p>
       </header>
 
-      <!-- Form -->
-      <form id="login-form" class="login-form">
+      <form id="register-form" class="login-form" method="POST">
         <div class="field">
-          <label for="email" data-i18n="loginEmail">Correo electrónico</label>
+          <label for="full-name" data-i18n="registerName">Nombre completo</label>
+          <div class="field-input-wrapper">
+            <span class="field-icon"><i class="ri-user-line"></i></span>
+            <input type="text" id="full-name" name="fullName" data-i18n-placeholder="registerNamePlaceholder" placeholder="Ej: Juan Pérez" autocomplete="name" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email" data-i18n="registerEmail">Correo electrónico</label>
           <div class="field-input-wrapper">
             <span class="field-icon"><i class="ri-mail-line"></i></span>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              data-i18n-placeholder="loginEmailPlaceholder"
-              placeholder="operador@nattivo.com"
-              autocomplete="email"
-              required
-            />
-            <span class="field-status" id="email-status">
-              <i class="ri-check-line"></i>
-            </span>
+            <input type="email" id="email" name="email" data-i18n-placeholder="registerEmailPlaceholder" placeholder="operador@nattivo.com" autocomplete="email" required />
+            <span class="field-status" id="email-status"><i class="ri-check-line"></i></span>
           </div>
         </div>
 
         <div class="field">
-          <label for="password" data-i18n="loginPassword">Contraseña</label>
+          <label for="password" data-i18n="registerPassword">Contraseña</label>
           <div class="field-input-wrapper">
             <span class="field-icon"><i class="ri-lock-2-line"></i></span>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              data-i18n-placeholder="loginPasswordPlaceholder"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              required
-            />
-            <button type="button" class="field-toggle" id="password-toggle">
-              <i class="ri-eye-off-line"></i>
-            </button>
+            <input type="password" id="password" name="password" data-i18n-placeholder="registerPasswordPlaceholder" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required minlength="6" />
+            <button type="button" class="field-toggle" id="password-toggle"><i class="ri-eye-off-line"></i></button>
           </div>
         </div>
 
-        <div class="login-options">
-          <label class="checkbox">
-            <input type="checkbox" id="remember" name="remember" />
-            <span class="checkbox-box"><i class="ri-check-line"></i></span>
-            <span data-i18n="loginRemember">Recordarme</span>
-          </label>
-          <button type="button" class="link-button" data-i18n="loginForgot">¿Olvidaste tu contraseña?</button>
+        <div class="field">
+          <label for="confirm-password" data-i18n="registerConfirm">Confirmar contraseña</label>
+          <div class="field-input-wrapper">
+            <span class="field-icon"><i class="ri-lock-2-line"></i></span>
+            <input type="password" id="confirm-password" name="confirmPassword" data-i18n-placeholder="registerConfirmPlaceholder" placeholder="Repite la contraseña" autocomplete="new-password" required />
+          </div>
         </div>
 
-        <button type="submit" class="btn-primary" id="login-submit" data-i18n="loginButton">
-          Ingresar
-        </button>
+        <button type="submit" class="btn-primary" id="register-submit" data-i18n="registerButton">Crear cuenta</button>
 
-        <div id="login-status" class="login-status"></div>
+        <div id="register-status" class="login-status"></div>
       </form>
 
       <div class="login-footer">
-        <span data-i18n="loginNoAccount">¿No tienes cuenta?</span>
-        <a href="/registro.html" class="link-button" data-i18n="loginCreateAccount">Crear cuenta</a>
+        <span data-i18n="registerHasAccount">¿Ya tienes cuenta?</span>
+        <a href="/login.html" class="link-button" data-i18n="registerLogin">Iniciar sesión</a>
       </div>
     </section>
 
@@ -131,35 +115,29 @@
       <div class="photo-caption">
         <div class="photo-caption-silhouette"></div>
         <h2>Nattivo Collection Hotel</h2>
-        <p data-i18n="loginSubtitle">Ingresa con tu correo corporativo y contraseña.</p>
+        <p data-i18n="registerSubtitle">Regístrate para gestionar el minibar del hotel.</p>
       </div>
     </section>
   </div>
 
-  <!-- Preloader overlay -->
   <div id="loader-overlay" class="loader-overlay">
     <div class="loader-card">
       <img src="/images/Logo_Nattivo_v1.png" class="loader-logo" alt="Nattivo" />
       <div class="loader-spinner"></div>
-      <p class="loader-text" data-i18n="loginLoading">Iniciando sesión en el minibar…</p>
+      <p class="loader-text" data-i18n="registerLoading">Creando tu cuenta…</p>
     </div>
   </div>
 
   <script src="/js/theme.js" defer></script>
   <script src="/js/i18n.js" defer></script>
-  <script src="/js/login.js" defer></script>
+  <script src="/js/register.js" defer></script>
 
   <script>
     (function() {
       var theme = localStorage.getItem("chargeit-theme") || "light";
       document.documentElement.setAttribute("data-theme", theme);
-
       var lang = localStorage.getItem("chargeit-lang") || "es";
       document.documentElement.setAttribute("lang", lang);
-
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js");
-      }
     })();
   </script>
 </body>

@@ -21,7 +21,7 @@ function initDbPool() {
     connectionLimit: Number(process.env.DB_POOL_LIMIT || 10),
     queueLimit: 0,
     decimalNumbers: true,
-    timezone: "Z"
+    timezone: "-05:00"
   });
 
   return pool;

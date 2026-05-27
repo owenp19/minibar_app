@@ -1,5 +1,5 @@
 /* =========================
-   Nattivo - Consumo (UI/UX Pro)
+   ChargeIt Hotel - App Logic
    ========================= */
 
 const WHATSAPP_PHONE = "";
@@ -710,6 +710,28 @@ function buildReportFilename(from, to) {
   return `informe-consumos-${f}-${t}.pdf`;
 }
 
+function loadPdfLogo() {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      try {
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = c.toDataURL("image/png");
+        resolve(dataUrl);
+      } catch (e) {
+        resolve(null);
+      }
+    };
+    img.onerror = function () { resolve(null); };
+    img.src = "/images/Logo_Nattivo_v2.png";
+  });
+}
+
 async function downloadReportPdf() {
   setReportStatus("", "");
 
@@ -740,96 +762,160 @@ async function downloadReportPdf() {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const margin = 48;
-
     const gen = nowLabel();
 
-    let y = 70;
+    const logoData = await loadPdfLogo();
 
+    let y = 56;
+
+    // ── Header with logo ──
+    if (logoData) {
+      doc.addImage(logoData, "PNG", pageW - margin - 120, y - 12, 120, 40);
+    }
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("INFORME DE CONSUMOS - MINIBAR NATTIVO", margin, y);
+    doc.setFontSize(18);
+    doc.text("INFORME DE CONSUMOS", margin, y);
+
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Minibar — Nattivo Collection Hotel", margin, y);
+    doc.setTextColor(0);
 
     y += 22;
+    doc.setDrawColor(194, 214, 155);
+    doc.setLineWidth(1.5);
+    doc.line(margin, y, pageW - margin, y);
+    doc.setLineWidth(0.5);
+
+    y += 18;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("Rango de fechas:", margin, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(`Rango: ${from || "—"} a ${to || "—"}`, margin, y);
+    doc.text(`${from || "—"}  a  ${to || "—"}`, margin + 82, y);
 
     y += 16;
-    doc.text(`Generado: ${gen}`, margin, y);
+    doc.setFont("helvetica", "bold");
+    doc.text("Generado:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(gen, margin + 52, y);
+
+    y += 16;
+    doc.setFont("helvetica", "bold");
+    doc.text("Habitaciones con consumo:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(grouped.length), margin + 130, y);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Total general:", pageW - margin, y, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.text(formatPrice(grandTotal), pageW - margin - 74, y, { align: "right" });
 
     y += 18;
-    doc.setDrawColor(180);
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.5);
     doc.line(margin, y, pageW - margin, y);
 
-    y += 22;
-    doc.setFont("helvetica", "bold");
-    doc.text(`Habitaciones con consumo: ${grouped.length}`, margin, y);
-    doc.text(`Total general: ${formatPrice(grandTotal)}`, pageW - margin, y, { align: "right" });
-
     y += 18;
-    doc.setFont("helvetica", "normal");
 
-    const ensureSpace = (need) => {
+    // ── Ensure space helper ──
+    function ensureSpace(need) {
       if (y + need <= pageH - 48) return;
       doc.addPage();
-      y = 72;
-    };
+      y = 56;
+      if (logoData) {
+        doc.addImage(logoData, "PNG", pageW - margin - 120, y - 14, 120, 40);
+      }
+      y += 18;
+      doc.setDrawColor(194, 214, 155);
+      doc.setLineWidth(1.5);
+      doc.line(margin, y, pageW - margin, y);
+      doc.setLineWidth(0.5);
+      y += 18;
+    }
 
+    // ── Rooms loop ──
     grouped.forEach((g) => {
-      ensureSpace(80);
+      ensureSpace(90);
+
+      doc.setFillColor(245, 245, 240);
+      doc.rect(margin, y - 10, pageW - margin * 2, 28, "F");
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
-      doc.text(`Habitación ${g.roomNumber}`, margin, y);
+      doc.text(`Habitación ${g.roomNumber}`, margin, y + 4);
 
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-      doc.text(`Consumos: ${g.records.length}  Ítems: ${g.roomItems}`, margin, y + 16);
-      doc.text(`Total: ${formatPrice(g.roomTotal)}`, pageW - margin, y + 16, { align: "right" });
+      doc.setFontSize(10);
+      doc.text(`Consumos: ${g.records.length}  |  Ítems: ${g.roomItems}`, margin, y + 20);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total: ${formatPrice(g.roomTotal)}`, pageW - margin, y + 4, { align: "right" });
 
-      y += 30;
-      doc.setDrawColor(210);
+      y += 34;
+      doc.setDrawColor(220);
       doc.line(margin, y, pageW - margin, y);
-      y += 18;
+      y += 14;
 
       g.records.forEach((r) => {
-        ensureSpace(50);
+        ensureSpace(60);
 
         const d = r.createdAt ? r.createdAt.toLocaleDateString("es-CO") : "—";
         const t = r.createdAt
           ? r.createdAt.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
           : "—";
 
+        doc.setFillColor(250, 250, 248);
+        doc.rect(margin, y - 8, pageW - margin * 2, 22, "F");
+
         doc.setFont("helvetica", "bold");
-        doc.text(`${d}  ${t}`, margin, y);
+        doc.setFontSize(10);
+        doc.text(`${d}  ${t}`, margin, y + 3);
 
         doc.setFont("helvetica", "normal");
-        doc.text(formatPrice(r.total), pageW - margin, y, { align: "right" });
+        doc.text(formatPrice(r.total), pageW - margin, y + 3, { align: "right" });
 
-        y += 16;
+        y += 18;
 
         r.items.forEach((it) => {
           ensureSpace(30);
           const lineTotal = it.quantity * it.price;
-          doc.text(`${it.quantity} × ${it.name}`, margin, y, { maxWidth: pageW - margin * 2 - 140 });
+          doc.text(`${it.quantity} × ${it.name}`, margin + 14, y, { maxWidth: pageW - margin * 2 - 160 });
           doc.text(formatPrice(lineTotal), pageW - margin, y, { align: "right" });
-          y += 14;
+          y += 13;
         });
 
-        y += 8;
-        doc.setDrawColor(235);
-        doc.line(margin, y, pageW - margin, y);
-        y += 14;
+        y += 6;
+        doc.setDrawColor(230);
+        doc.line(margin + 14, y, pageW - margin, y);
+        y += 10;
       });
 
-      y += 6;
+      y += 4;
     });
 
+    // ── Grand total ──
     ensureSpace(60);
+    doc.setDrawColor(194, 214, 155);
+    doc.setLineWidth(1.5);
+    doc.line(margin, y - 4, pageW - margin, y - 4);
+    doc.setLineWidth(0.5);
+    y += 6;
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(13);
     doc.text("TOTAL GENERAL", margin, y);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
     doc.text(formatPrice(grandTotal), pageW - margin, y, { align: "right" });
+
+    // ── Footer ──
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Nattivo Collection Hotel — ChargeIt Minibar App", margin, pageH - 20, { align: "center" });
+    doc.setTextColor(0);
 
     doc.save(buildReportFilename(from, to));
     setReportStatus("Informe descargado correctamente.", "ok");
@@ -1016,22 +1102,6 @@ function setupEvents() {
   const downloadBtn = $("download-report-btn");
   if (downloadBtn) downloadBtn.addEventListener("click", downloadReportPdf);
 }
-
-/* ---------- Init ---------- */
-async function init() {
-  loadCurrentUser();
-
-  await loadRooms({ clear: true });
-  await loadProducts();
-
-  setupMenuToggle();
-  setupEvents();
-
-  // ensure KPIs show something
-  updateKpis();
-}
-
-document.addEventListener("DOMContentLoaded", init);
 
 /* =========================
    Desbloqueo de habitación (multi-room) - ADDON
@@ -1249,11 +1319,15 @@ function setupUnlockEvents() {
 }
 
 /* =========================
-   Init (REEMPLAZAR tu init por este)
-   - Evita llamar endpoints que no existen en páginas que no los usan
+   Init
    ========================= */
 
 async function init() {
+  initTheme();
+  initLanguage();
+  setupThemeSwitcher(document.getElementById("app-theme-switcher"));
+  setupLangSelector(document.getElementById("app-lang-selector"));
+
   loadCurrentUser();
 
   // Consumo: solo si existen los elementos
@@ -1278,3 +1352,4 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+

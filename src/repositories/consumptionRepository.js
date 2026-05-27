@@ -66,9 +66,9 @@ async function getConsumptionWithItemsById(consumptionId) {
         c.created_at AS createdAt,
         c.consumption_date AS consumptionDate,
         c.note AS note,
-        h.numero AS roomNumber
+        r.room_number AS roomNumber
       FROM consumptions c
-      JOIN habitaciones h ON h.id_habitacion = c.room_id
+      JOIN rooms r ON r.id = c.room_id
       WHERE c.id = ?
       LIMIT 1
     `,
@@ -110,7 +110,73 @@ async function getConsumptionWithItemsById(consumptionId) {
   };
 }
 
+async function getConsumptionsByDateRange(from, to) {
+  let sql = `
+    SELECT
+      c.id,
+      c.created_at AS createdAt,
+      c.consumption_date AS consumptionDate,
+      c.note AS note,
+      r.room_number AS roomNumber
+    FROM consumptions c
+    JOIN rooms r ON r.id = c.room_id
+  `;
+  const params = [];
+
+  if (from && to) {
+    sql += ` WHERE c.created_at >= ? AND c.created_at <= ?`;
+    params.push(from + " 00:00:00", to + " 23:59:59");
+  } else if (from) {
+    sql += ` WHERE c.created_at >= ?`;
+    params.push(from + " 00:00:00");
+  } else if (to) {
+    sql += ` WHERE c.created_at <= ?`;
+    params.push(to + " 23:59:59");
+  }
+
+  sql += ` ORDER BY c.created_at DESC`;
+
+  const rows = await db.query(sql, params);
+  if (!rows || rows.length === 0) return [];
+
+  const consumptions = [];
+  for (const c of rows) {
+    const itemRows = await db.query(
+      `
+        SELECT
+          p.name AS name,
+          p.price AS price,
+          ci.quantity AS quantity
+        FROM consumption_items ci
+        JOIN products p ON p.id = ci.product_id
+        WHERE ci.consumption_id = ?
+      `,
+      [c.id]
+    );
+
+    const items = (itemRows || []).map((x) => ({
+      name: x.name,
+      price: Number(x.price) || 0,
+      quantity: Number(x.quantity) || 0,
+    }));
+
+    const total = items.reduce((acc, it) => acc + it.quantity * it.price, 0);
+
+    consumptions.push({
+      id: c.id,
+      createdAt: c.createdAt || c.consumptionDate || null,
+      roomNumber: String(c.roomNumber ?? "").trim(),
+      note: c.note || "",
+      items,
+      total,
+    });
+  }
+
+  return consumptions;
+}
+
 module.exports = {
   createConsumptionWithItems,
   getConsumptionWithItemsById,
+  getConsumptionsByDateRange,
 };

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="appName">ChargeIt Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+  <!-- Preloader -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="preloader-logo" />
+      <div class="preloader-bar">
+        <div class="preloader-bar-fill"></div>
+      </div>
+      <span class="preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <span id="user-initials"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Operador minibar</div>
+            <div class="sidebar-user-role" data-i18n="hotelName">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <div class="sidebar-quick">
+          <a class="quick-btn" href="/app/ChargeIt" aria-current="page">
+            <i class="ri-flashlight-line"></i>
+            <span data-i18n="navNewConsumption">Nuevo consumo</span>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/ChargeIt" class="nav-item nav-item-active" aria-current="page">
+            <i class="ri-shopping-bag-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
+          </a>
+          <a href="/app/minibar" class="nav-item">
+            <i class="ri-fridge-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navMinibars">Minibares</span>
+          </a>
+          <a href="/unlock.html" class="nav-item">
+            <i class="ri-key-2-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
+          </a>
+          <a href="/perfil" class="nav-item">
+            <i class="ri-user-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navProfile">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ri-settings-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navSettings">Configuración</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-nav" style="margin-top:auto">
+          <a href="#" class="nav-item" id="help-btn">
+            <i class="ri-question-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
+          </a>
+        </div>
+
+        <div class="sidebar-credit">
+          <span data-i18n="footerVersion">v1.0.1</span><br>
+          <span data-i18n="footerDeveloped">Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ri-logout-box-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="ri-menu-line"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div class="breadcrumb">
+            <i class="ri-home-5-line"></i>
+            <span data-i18n="breadcrumbHome">Minibar</span>
+            <i class="ri-arrow-right-s-line"></i>
+            <strong data-i18n="breadcrumbConsumption">Consumo</strong>
+          </div>
+
+          <h1 data-i18n="consumptionTitle">Registro de consumo</h1>
+
+          <p data-i18n="consumptionDesc">
+            Selecciona la habitación, marca los productos consumidos y envía el resumen a recepción por WhatsApp.
+          </p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ri-sun-line"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ri-moon-line"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- KPI Row -->
+      <section class="kpi-row" aria-label="Resumen">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="ri-hotel-bed-line"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-label" data-i18n="kpiRoom">Habitación</div>
+            <div class="kpi-value" id="kpi-room">—</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="ri-shopping-cart-2-line"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-label" data-i18n="kpiItems">Items</div>
+            <div class="kpi-value" id="kpi-items">0</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="ri-cash-line"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-label" data-i18n="kpiTotal">Total</div>
+            <div class="kpi-value" id="kpi-total">$0</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="ri-time-line"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-label" data-i18n="kpiLastAction">Última acción</div>
+            <div class="kpi-value" id="kpi-time">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Card -->
+      <section class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2 class="card-title" data-i18n="consumptionTitle">Herramienta de consumo</h2>
+            <p class="card-subtitle" data-i18n="consumptionDesc">Registro rápido, claro y listo para enviar.</p>
+          </div>
+
+          <div class="card-head-actions">
+            <button class="btn-secondary" type="button" id="clear-btn">
+              <i class="ri-eraser-line"></i>
+              <span data-i18n="consumptionClear">Limpiar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- LEFT -->
+          <div class="form-column">
+            <div class="form-section">
+              <label for="room-select" data-i18n="consumptionRoom">Habitación</label>
+              <div class="select-row">
+                <select id="room-select">
+                  <option value="" data-i18n="consumptionRoomPlaceholder">Seleccione una habitación</option>
+                </select>
+
+                <button class="btn-ghost" type="button" id="refresh-rooms-btn" aria-label="Actualizar habitaciones">
+                  <i class="ri-refresh-line"></i>
+                </button>
+              </div>
+
+              <div class="helper-text">
+                <i class="ri-information-line"></i>
+                <span data-i18n="consumptionRoomTip">Tip: primero selecciona la habitación para habilitar el listado de productos.</span>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-head">
+                <label data-i18n="consumptionProducts">Productos del minibar</label>
+
+                <div class="section-tools">
+                  <div class="search-box">
+                    <i class="ri-search-line"></i>
+                    <input id="product-search" type="text" data-i18n-placeholder="consumptionSearch" placeholder="Buscar producto…" />
+                  </div>
+
+                  <button class="btn-ghost" type="button" id="select-all-btn" data-i18n-title="consumptionSelectAll" title="Seleccionar todo">
+                    <i class="ri-check-double-line"></i>
+                  </button>
+
+                  <button class="btn-ghost" type="button" id="unselect-all-btn" data-i18n-title="consumptionUnselectAll" title="Quitar selección">
+                    <i class="ri-close-circle-line"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div id="products-list" class="products-list" aria-label="Listado de productos"></div>
+
+              <div class="helper-text">
+                <i class="ri-shield-check-line"></i>
+                <span data-i18n="consumptionTotalHint">El total se calcula automáticamente según cantidades seleccionadas.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="form-column form-column-side">
+            <div class="report-card">
+              <div class="report-head">
+                <div>
+                  <h2 data-i18n="consumptionReportTitle">Informe</h2>
+                  <p class="summary-text-report" data-i18n="consumptionReportDesc">
+                    Genera el PDF con consumos por rango de fechas.
+                  </p>
+                </div>
+                <span class="pill">
+                  <i class="ri-file-pdf-2-line"></i>
+                  PDF
+                </span>
+              </div>
+
+              <div class="report-filters">
+                <div class="report-field">
+                  <label for="report-from" data-i18n="consumptionReportFrom">Desde</label>
+                  <input type="date" id="report-from" />
+                </div>
+
+                <div class="report-field">
+                  <label for="report-to" data-i18n="consumptionReportTo">Hasta</label>
+                  <input type="date" id="report-to" />
+                </div>
+
+                <button id="download-report-btn" class="btn-report" type="button">
+                  <i class="ri-file-download-line"></i>
+                  <span data-i18n="consumptionReportDownload">Descargar PDF</span>
+                </button>
+              </div>
+
+              <div id="report-status" class="report-status"></div>
+            </div>
+
+            <div class="form-section">
+              <label for="note" data-i18n="consumptionNote">Nota (opcional)</label>
+              <textarea id="note" rows="3" data-i18n-placeholder="consumptionNotePlaceholder" placeholder="Ej: salida tardía, consumo extra, minibar incompleto, etc."></textarea>
+              <div class="helper-text">
+                <i class="ri-chat-1-line"></i>
+                <span data-i18n="consumptionNoteHint">Esta nota se incluirá en el resumen enviado a recepción.</span>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button id="submit-btn" class="btn-primary" type="button">
+                <i class="ri-whatsapp-line"></i>
+                <span data-i18n="consumptionSend">Enviar a recepción</span>
+              </button>
+
+              <div class="action-row">
+                <button id="preview-btn" class="btn-secondary" type="button">
+                  <i class="ri-eye-line"></i>
+                  <span data-i18n="consumptionPreview">Vista previa</span>
+                </button>
+                <button id="copy-btn" class="btn-secondary" type="button">
+                  <i class="ri-file-copy-line"></i>
+                  <span data-i18n="consumptionCopy">Copiar resumen</span>
+                </button>
+              </div>
+
+              <div id="status" class="status"></div>
+
+              <div class="disclaimer">
+                <i class="ri-lock-2-line"></i>
+                <span data-i18n="consumptionVerify">Verifica habitación y total antes de enviar.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preview Modal -->
+      <div class="modal" id="preview-modal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+          <div class="modal-head">
+            <h3 id="preview-title" data-i18n="modalPreview">Vista previa del resumen</h3>
+            <button class="btn-ghost" type="button" id="close-preview-btn" data-i18n-aria="modalClose" aria-label="Cerrar">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <pre class="preview-box" id="preview-content">—</pre>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" type="button" id="preview-copy-btn">
+              <i class="ri-file-copy-line"></i>
+              <span data-i18n="modalCopy">Copiar</span>
+            </button>
+            <button class="btn-primary" type="button" id="preview-send-btn">
+              <i class="ri-whatsapp-line"></i>
+              <span data-i18n="modalSend">Enviar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <!-- Navigation Preloader -->
+  <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
+    <div class="nav-preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <div class="nav-preloader-bar">
+        <div class="nav-preloader-fill"></div>
+      </div>
+      <span class="nav-preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
+  <script src="/js/theme.js" defer></script>
+  <script src="/js/i18n.js" defer></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/chatbot.js" defer></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem("chargeit-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      var lang = localStorage.getItem("chargeit-lang") || "es";
+      document.documentElement.setAttribute("lang", lang);
+
+      // Hide preloader after theme/lang are set
+      setTimeout(function() {
+        var preloader = document.getElementById("preloader");
+        if (preloader) preloader.classList.add("hidden");
+      }, 300);
+
+      document.getElementById("help-btn")?.addEventListener("click", function(e) {
+        e.preventDefault();
+        var btn = document.getElementById("chatbot-toggle");
+        if (btn) btn.click();
+      });
+
+      // Navigation preloader
+      document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
+        link.addEventListener("click", function(e) {
+          var href = link.getAttribute("href");
+          if (!href || href === "#" || href.startsWith("http") || href.startsWith("//") || href.startsWith("/api")) return;
+          e.preventDefault();
+          var preloader = document.getElementById("nav-preloader");
+          if (preloader) {
+            preloader.classList.remove("hidden");
+            preloader.classList.add("visible");
+          }
+          setTimeout(function() {
+            window.location.href = href;
+          }, 400);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

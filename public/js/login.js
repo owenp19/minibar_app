@@ -1,4 +1,13 @@
+/* ===================================================
+   ChargeIt Hotel — Login Logic
+   =================================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  initLanguage();
+  setupThemeSwitcher(document.getElementById("login-theme-switcher"));
+  setupLangSelector(document.getElementById("login-lang-selector"));
+
   const form = document.getElementById("login-form");
   const emailInput = document.getElementById("email");
   const emailStatus = document.getElementById("email-status");
@@ -9,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showLoader(show) {
     if (!loaderOverlay) return;
-    loaderOverlay.style.display = show ? "flex" : "none";
+    loaderOverlay.classList.toggle("visible", show);
   }
 
   function setStatus(message, type) {
@@ -18,18 +27,19 @@ document.addEventListener("DOMContentLoaded", () => {
     loginStatus.className = "login-status" + (type ? " " + type : "");
   }
 
+  // Password toggle
   if (passwordToggle && passwordInput) {
     passwordToggle.addEventListener("click", () => {
       const isHidden = passwordInput.type === "password";
       passwordInput.type = isHidden ? "text" : "password";
       const icon = passwordToggle.querySelector("i");
       if (icon) {
-        icon.classList.remove(isHidden ? "ri-eye-off-line" : "ri-eye-line");
-        icon.classList.add(isHidden ? "ri-eye-line" : "ri-eye-off-line");
+        icon.className = isHidden ? "ri-eye-line" : "ri-eye-off-line";
       }
     });
   }
 
+  // Email validation indicator
   if (emailInput && emailStatus) {
     emailInput.addEventListener("input", () => {
       const value = emailInput.value.trim();
@@ -38,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Form submit
   if (form) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -61,16 +72,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!response.ok) {
           const text = await response.text();
           showLoader(false);
-          setStatus(text || "Error al iniciar sesión. Inténtalo de nuevo.", "error");
+          const lang = getCurrentLang();
+          setStatus(text || (lang === "en" ? "Error signing in. Try again." : "Error al iniciar sesión. Inténtalo de nuevo."), "error");
           return;
         }
 
         showLoader(false);
-        window.location.href = "/app"; // Redirige a /app después de un login exitoso
+        window.location.href = "/app";
       } catch (error) {
         console.error("Error en login:", error);
         showLoader(false);
-        setStatus("Ocurrió un error al iniciar sesión. Verifica tu conexión.", "error");
+        const lang = getCurrentLang();
+        setStatus(lang === "en" ? "An error occurred while signing in. Check your connection." : "Ocurrió un error al iniciar sesión. Verifica tu conexión.", "error");
       }
     });
   }

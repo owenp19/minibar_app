@@ -6,6 +6,7 @@ const PDFDocument = require("pdfkit");
 const {
   createConsumptionWithItems,
   getConsumptionWithItemsById,
+  getConsumptionsByDateRange,
 } = require("../repositories/consumptionRepository");
 
 const router = express.Router();
@@ -34,6 +35,16 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ message: err.message || "Error creando consumo" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    const consumptions = await getConsumptionsByDateRange(from, to);
+    res.json(consumptions);
+  } catch (err) {
+    res.status(500).json({ message: "Error consultando consumos" });
   }
 });
 

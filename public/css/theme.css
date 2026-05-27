@@ -1,0 +1,153 @@
+/* ===================================================
+   ChargeIt Hotel — Nattivo Collection Theme
+   Inspired by Nattivo Collection Hotel, San Andrés
+   =================================================== */
+
+:root {
+  /* Fondos principales */
+  --color-bg: #F7F4EE;
+  --color-surface: #FFFDF8;
+  --color-card: #FFFFFF;
+  --color-card-soft: #F0E8DC;
+
+  /* Identidad Nattivo — Verde institucional del logo */
+  --color-primary: #4D553D;
+  --color-primary-hover: #5B6448;
+  --color-primary-active: #3F4732;
+  --color-primary-soft: rgba(77, 85, 61, 0.12);
+
+  /* Complemento cálido */
+  --color-secondary: #C9A45D;
+  --color-secondary-hover: #B38F46;
+  --color-secondary-soft: rgba(201, 164, 93, 0.16);
+
+  /* Arena / lujo */
+  --color-accent: #8B6A4F;
+  --color-accent-hover: #7A5D44;
+  --color-accent-soft: rgba(139, 106, 79, 0.14);
+
+  /* Naturaleza */
+  --color-palm: #7C9068;
+  --color-palm-soft: rgba(124, 144, 104, 0.14);
+
+  /* Tonos neutros */
+  --color-sand: #EFE0C8;
+  --color-ivory: #FFFDF7;
+  --color-wood: #8B6A4F;
+  --color-coral: #D98261;
+
+  /* Textos */
+  --color-heading: #1F241F;
+  --color-text: #2F332D;
+  --color-muted: #74796F;
+
+  /* Bordes */
+  --color-border-soft: rgba(0, 0, 0, 0.07);
+  --color-border-strong: rgba(0, 0, 0, 0.14);
+
+  /* Estados */
+  --color-success: #4F8F68;
+  --color-warning: #D6A84F;
+  --color-danger: #C75C4A;
+  --color-info: #18A7B5;
+
+  /* Sombras */
+  --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 14px 34px rgba(77, 85, 61, 0.14);
+  --shadow-hover: 0 18px 44px rgba(77, 85, 61, 0.20);
+
+  /* Bordes redondeados */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* Transiciones */
+  --transition-fast: 0.16s ease;
+  --transition-normal: 0.24s ease;
+  --transition-slow: 0.35s ease;
+
+  /* Tipografía */
+  --font-title: "Anton SC", sans-serif;
+  --font-text: "Roboto", sans-serif;
+
+  /* Sidebar */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: rgba(0, 0, 0, 0.07);
+  --sidebar-text: #1F241F;
+  --sidebar-muted: #74796F;
+  --sidebar-active-bg: rgba(77, 85, 61, 0.08);
+  --sidebar-active-border: #4D553D;
+
+  /* Inputs */
+  --input-bg: #F0E8DC;
+  --input-bg-focus: #E8DECE;
+  --input-border: rgba(0, 0, 0, 0.10);
+
+  /* Layout */
+  --container-max: 1220px;
+
+  /* Login */
+  --login-overlay: rgba(77, 85, 61, 0.85);
+}
+
+[data-theme="dark"] {
+  --color-bg: #11140E;
+  --color-surface: #1A1E16;
+  --color-card: #22271E;
+  --color-card-soft: #2C3228;
+
+  --color-primary: #A8B894;
+  --color-primary-hover: #B8C8A4;
+  --color-primary-active: #C8D8B4;
+  --color-primary-soft: rgba(168, 184, 148, 0.14);
+
+  --color-secondary: #D8B86A;
+  --color-secondary-hover: #E5C879;
+  --color-secondary-soft: rgba(216, 184, 106, 0.14);
+
+  --color-accent: #A88B72;
+  --color-accent-hover: #B89B82;
+  --color-accent-soft: rgba(168, 139, 114, 0.14);
+
+  --color-palm: #A5B98D;
+  --color-palm-soft: rgba(165, 185, 141, 0.14);
+
+  --color-sand: #3A3328;
+  --color-ivory: #F7F4EE;
+  --color-wood: #B99675;
+  --color-coral: #E59A7D;
+
+  --color-heading: #F7F8F4;
+  --color-text: #E8ECE4;
+  --color-muted: #AAB2A5;
+
+  --color-border-soft: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+
+  --color-success: #7AC99A;
+  --color-warning: #E3BE63;
+  --color-danger: #E17668;
+  --color-info: #67D3D0;
+
+  --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.30);
+  --shadow-card: 0 14px 34px rgba(0, 0, 0, 0.38);
+  --shadow-hover: 0 18px 44px rgba(0, 0, 0, 0.46);
+
+  --sidebar-bg: #1A1E16;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-text: #F7F8F4;
+  --sidebar-muted: #AAB2A5;
+  --sidebar-active-bg: rgba(168, 184, 148, 0.10);
+  --sidebar-active-border: #A8B894;
+
+  --input-bg: #22271E;
+  --input-bg-focus: #2C3228;
+  --input-border: rgba(255, 255, 255, 0.10);
+
+  --login-overlay: rgba(17, 20, 14, 0.92);
+}

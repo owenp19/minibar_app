@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="profileTitle">Perfil – ChargeIt Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <span id="user-initials"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Operador minibar</div>
+            <div class="sidebar-user-role" data-i18n="hotelName">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <div class="sidebar-quick">
+          <a class="quick-btn" href="/app/ChargeIt">
+            <i class="ri-flashlight-line"></i>
+            <span data-i18n="navNewConsumption">Nuevo consumo</span>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/ChargeIt" class="nav-item">
+            <i class="ri-shopping-bag-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navConsumption">Consumo</span>
+          </a>
+          <a href="/app/minibar" class="nav-item">
+            <i class="ri-fridge-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navMinibars">Minibares</span>
+          </a>
+          <a href="/unlock.html" class="nav-item">
+            <i class="ri-key-2-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
+          </a>
+          <a href="/perfil" class="nav-item nav-item-active" aria-current="page">
+            <i class="ri-user-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navProfile">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ri-settings-3-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navSettings">Configuración</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-nav" style="margin-top:auto">
+          <a href="#" class="nav-item" id="help-btn">
+            <i class="ri-question-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navHelp">Ayuda</span>
+          </a>
+        </div>
+
+        <div class="sidebar-credit">
+          <span data-i18n="footerVersion">v1.0.1</span><br>
+          <span data-i18n="footerDeveloped">Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ri-logout-box-line nav-icon"></i>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="ri-menu-line"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div class="breadcrumb">
+            <i class="ri-home-5-line"></i>
+            <span data-i18n="breadcrumbHome">Minibar</span>
+            <i class="ri-arrow-right-s-line"></i>
+            <strong data-i18n="profileTitle">Perfil</strong>
+          </div>
+
+          <h1 data-i18n="profileTitle">Perfil</h1>
+          <p data-i18n="profileDesc">Gestiona tu información personal y foto de perfil.</p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ri-sun-line"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ri-moon-line"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="profile-grid">
+        <!-- Photo Card -->
+        <div class="profile-photo-card">
+          <div class="profile-avatar-wrap">
+            <img id="profile-avatar-img" class="profile-avatar-img" src="" alt="Foto de perfil" />
+            <div class="profile-avatar-placeholder" id="profile-avatar-placeholder">
+              <span id="profile-initials">OP</span>
+            </div>
+            <div class="profile-avatar-overlay" id="profile-avatar-overlay" title="Cambiar foto">
+              <i class="ri-camera-line"></i>
+            </div>
+            <input type="file" id="profile-photo-input" accept="image/*" />
+          </div>
+          <div class="profile-photo-name" id="profile-display-name">Cargando…</div>
+          <div class="profile-photo-role" id="profile-display-role">—</div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="profile-form-card">
+          <h2 data-i18n="profileTitle">Perfil</h2>
+          <p data-i18n="profileDesc">Gestiona tu información personal y foto de perfil.</p>
+
+          <div class="profile-field">
+            <label for="profile-name" data-i18n="profileName">Nombre completo</label>
+            <input type="text" id="profile-name" data-i18n-placeholder="profileNamePlaceholder" placeholder="Tu nombre completo" />
+          </div>
+
+          <div class="profile-field">
+            <label for="profile-email" data-i18n="profileEmail">Correo electrónico</label>
+            <input type="email" id="profile-email" data-i18n-placeholder="profileEmailPlaceholder" placeholder="correo@ejemplo.com" />
+          </div>
+
+          <div class="profile-field">
+            <label for="profile-phone" data-i18n="profilePhone">Teléfono</label>
+            <input type="text" id="profile-phone" data-i18n-placeholder="profilePhonePlaceholder" placeholder="+57 300 123 4567" />
+          </div>
+
+          <div class="profile-actions">
+            <button class="btn-primary" type="button" id="profile-save-btn">
+              <i class="ri-save-3-line"></i>
+              <span data-i18n="profileSave">Guardar cambios</span>
+            </button>
+          </div>
+
+          <div id="profile-status" class="profile-status"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Navigation Preloader -->
+  <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
+    <div class="nav-preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <div class="nav-preloader-bar">
+        <div class="nav-preloader-fill"></div>
+      </div>
+      <span class="nav-preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
+  <script src="/js/theme.js" defer></script>
+  <script src="/js/i18n.js" defer></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/chatbot.js" defer></script>
+  <script src="/js/perfil.js" defer></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem("chargeit-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      var lang = localStorage.getItem("chargeit-lang") || "es";
+      document.documentElement.setAttribute("lang", lang);
+
+      document.getElementById("help-btn")?.addEventListener("click", function(e) {
+        e.preventDefault();
+        var btn = document.getElementById("chatbot-toggle");
+        if (btn) btn.click();
+      });
+
+      // Navigation preloader
+      document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
+        link.addEventListener("click", function(e) {
+          var href = link.getAttribute("href");
+          if (!href || href === "#" || href.startsWith("http") || href.startsWith("//") || href.startsWith("/api")) return;
+          e.preventDefault();
+          var preloader = document.getElementById("nav-preloader");
+          if (preloader) {
+            preloader.classList.remove("hidden");
+            preloader.classList.add("visible");
+          }
+          setTimeout(function() {
+            window.location.href = href;
+          }, 400);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
