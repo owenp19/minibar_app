@@ -12,13 +12,9 @@
   const $$ = (sel) => document.querySelectorAll(sel);
 
   const el = {
-    viewDashboard: $('#view-dashboard'),
     viewFloors: $('#view-floors'),
     viewRooms: $('#view-rooms'),
     viewRoomDetail: $('#view-room-detail'),
-    dashboardContainer: $('#dashboard-container'),
-    dashGoFloorsBtn: $('#dash-go-floors-btn'),
-    dashRefreshBtn: $('#dash-refresh-btn'),
     floorsContainer: $('#floors-container'),
     roomsContainer: $('#rooms-container'),
     roomsHeading: $('#rooms-heading'),
@@ -52,13 +48,6 @@
     historyContainer: $('#history-container'),
     refreshHistoryBtn: $('#refresh-history-btn'),
 
-    reportFrom: $('#report-from'),
-    reportTo: $('#report-to'),
-    generateReportBtn: $('#generate-report-btn'),
-    downloadReportPdfBtn: $('#download-report-pdf-btn'),
-    reportResult: $('#report-result'),
-    reportStatus: $('#report-status'),
-
     previewModal: $('#preview-modal'),
     previewContent: $('#preview-content'),
     previewCopyBtn: $('#preview-copy-btn'),
@@ -87,14 +76,6 @@
     else if (tabName === 'restock') renderRestockForm();
     else if (tabName === 'adjust') renderAdjustForm();
     else if (tabName === 'history') loadAndRenderHistory();
-    else if (tabName === 'reports') {
-      if (!el.reportFrom.value) {
-        const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        el.reportFrom.value = firstDay.toISOString().split('T')[0];
-        el.reportTo.value = today.toISOString().split('T')[0];
-      }
-    }
   }
 
   function updateBreadcrumb(view, floorName, roomNumber) {
@@ -196,96 +177,6 @@
 
   // ============ DASHBOARD ============
 
-  async function loadDashboard() {
-    if (!el.dashboardContainer) return;
-    el.dashboardContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando dashboard...</h3></div>';
-    try {
-      const data = await apiFetch('/api/minibar/dashboard');
-      renderDashboard(data);
-    } catch (err) {
-      el.dashboardContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
-    }
-  }
-
-  function renderDashboard(data) {
-    const t = data.today || {};
-    const w = data.week || {};
-    let html = '';
-
-    html += '<div class="report-summary-cards">';
-    const cards = [
-      { label: 'Consumo hoy', value: formatCOP(t.total), icon: 'ph-light ph-currency-circle-dollar' },
-      { label: 'Productos hoy', value: String(t.products || 0), icon: 'ph-light ph-shopping-bag' },
-      { label: 'Movimientos hoy', value: String(t.movements || 0), icon: 'ph-light ph-list-dashes' },
-      { label: 'Semana', value: formatCOP(w.total), icon: 'ph-light ph-calendar' },
-      { label: 'Habitaciones', value: String(data.totalRooms || 0), icon: 'ph-light ph-bed' },
-      { label: 'Stock bajo', value: String(data.lowStockRoomCount || 0), icon: 'ph-light ph-warning' }
-    ];
-    for (const card of cards) {
-      html += '<div class="report-card">' +
-        '<div class="report-card-icon"><i class="' + card.icon + '"></i></div>' +
-        '<div class="report-card-value">' + card.value + '</div>' +
-        '<div class="report-card-label">' + card.label + '</div>' +
-      '</div>';
-    }
-    html += '</div>';
-
-    if (data.topProducts && data.topProducts.length) {
-      const top = data.topProducts[0];
-      html += '<div class="report-section"><h3 class="report-section-title">Producto destacado de hoy</h3>';
-      html += '<div class="featured-product-card">' +
-        '<div class="featured-product-icon"><i class="ph-light ph-trophy"></i></div>' +
-        '<div class="featured-product-info">' +
-          '<div class="featured-product-name">' + top.name + '</div>' +
-          '<div class="featured-product-stats">' +
-            '<span><strong>' + top.total_qty + '</strong> unidades consumidas</span>' +
-            '<span><strong>' + formatCOP(top.total_amount) + '</strong> en ventas</span>' +
-          '</div>' +
-        '</div>' +
-      '</div></div>';
-
-      if (data.topProducts.length > 1) {
-        html += '<div class="report-section"><h3 class="report-section-title">Productos m&aacute;s consumidos hoy</h3>';
-        html += '<div class="report-ranking">';
-        data.topProducts.forEach((p, i) => {
-          html += '<div class="report-rank-item"><span class="report-rank-num">#' + (i + 1) + '</span><span class="report-rank-label">' + p.name + '</span><span class="report-rank-value">' + p.total_qty + ' uds</span></div>';
-        });
-        html += '</div></div>';
-      }
-    }
-
-    if (data.recentMovements && data.recentMovements.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">&Uacute;ltimos movimientos</h3>';
-      html += '<div class="movements-table" style="max-height:300px;overflow-y:auto;"><table><thead><tr>' +
-        '<th>Hora</th><th>Tipo</th><th>Producto</th><th>Hab.</th><th>Cant.</th><th>Usuario</th>' +
-      '</tr></thead><tbody>';
-      const typeLabels = { consumption: 'Consumo', restock: 'Reposici&oacute;n', adjustment: 'Ajuste' };
-      for (const m of data.recentMovements) {
-        const date = new Date(m.created_at);
-        const dateStr = date.toLocaleDateString('es-CO') + ' ' + date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-        html += '<tr>' +
-          '<td class="movement-date">' + dateStr + '</td>' +
-          '<td><span class="movement-type-badge ' + m.movement_type + '">' + (typeLabels[m.movement_type] || m.movement_type) + '</span></td>' +
-          '<td>' + m.product_name + '</td>' +
-          '<td>' + m.room_number + '</td>' +
-          '<td class="movement-qty">' + m.quantity_moved + '</td>' +
-          '<td>' + (m.user_name || '&mdash;') + '</td>' +
-        '</tr>';
-      }
-      html += '</tbody></table></div></div>';
-    }
-
-    html += '<p class="report-generated-at">Actualizado: ' + new Date().toLocaleString('es-CO') + '</p>';
-    el.dashboardContainer.innerHTML = html;
-  }
-
-  function goToDashboard() {
-    showView('view-dashboard');
-    updateBreadcrumb('view-floors');
-    el.pageDescription.textContent = 'Bienvenido al panel de control del minibar.';
-    loadDashboard();
-  }
-
   // ============ FLOORS ============
 
   async function loadFloors() {
@@ -374,6 +265,100 @@
     switchTab('inventory');
   }
 
+  // ============ EXPIRATION HELPERS ============
+
+  function normalizeDateStr(val) {
+    if (!val) return '';
+    if (val instanceof Date) {
+      if (isNaN(val)) return '';
+      return val.getFullYear() + '-' + String(val.getMonth() + 1).padStart(2, '0') + '-' + String(val.getDate()).padStart(2, '0');
+    }
+    const s = String(val);
+    if (s.includes('T')) return s.split('T')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    return '';
+  }
+
+  function getExpirationStatus(expirationDate) {
+    if (!expirationDate) return { class: 'exp-gray', label: 'No definida', days: null };
+    const dateStr = normalizeDateStr(expirationDate);
+    if (!dateStr) return { class: 'exp-gray', label: 'No definida', days: null };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expDate = new Date(dateStr + 'T00:00:00');
+    if (isNaN(expDate.getTime())) return { class: 'exp-gray', label: 'No definida', days: null };
+    const diffTime = expDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return { class: 'exp-red', label: 'Vencido', days: diffDays };
+    if (diffDays <= 7) return { class: 'exp-red', label: diffDays + ' d\u00edas', days: diffDays };
+    if (diffDays <= 30) return { class: 'exp-yellow', label: diffDays + ' d\u00edas', days: diffDays };
+    return { class: 'exp-green', label: diffDays + ' d\u00edas', days: diffDays };
+  }
+
+  function formatDateLocal(dateStr) {
+    if (!dateStr) return '\u2014';
+    const s = normalizeDateStr(dateStr);
+    if (!s) return '\u2014';
+    const d = new Date(s + 'T00:00:00');
+    if (isNaN(d.getTime())) return '\u2014';
+    return d.toLocaleDateString('es-CO');
+  }
+
+  function renderExpirationModal(item) {
+    const existingModal = document.getElementById('expiration-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay visible';
+    modal.id = 'expiration-modal';
+    modal.innerHTML =
+      '<div class="modal-content" style="max-width:380px;">' +
+        '<div class="modal-header">' +
+          '<h3><i class="ph-light ph-calendar" style="margin-right:8px;"></i>Fecha de vencimiento</h3>' +
+          '<button class="modal-close-btn modal-close-trigger" aria-label="Cerrar"><i class="ph-light ph-x"></i></button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<p style="font-size:13px;margin-bottom:12px;">Producto: <strong>' + item.product_name + '</strong></p>' +
+          '<div class="admin-form-group">' +
+            '<label>Fecha de vencimiento</label>' +
+            '<input class="admin-input" id="expiration-date-input" type="date" value="' + (item.expiration_date || '') + '" />' +
+          '</div>' +
+          '<p style="font-size:11px;color:var(--color-muted);margin-top:8px;">Deja vac\u00edo si no tiene fecha de vencimiento.</p>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button class="btn-primary btn-sm" id="save-expiration-btn">Guardar</button>' +
+          '<button class="btn-ghost btn-sm modal-close-trigger">Cancelar</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    modal.querySelectorAll('.modal-close-trigger').forEach(function(btn) {
+      btn.addEventListener('click', function() { modal.remove(); });
+    });
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) modal.remove();
+    });
+
+    document.getElementById('save-expiration-btn').addEventListener('click', async function() {
+      const input = document.getElementById('expiration-date-input');
+      const expirationDate = input.value || null;
+
+      try {
+        await apiFetch('/api/minibar/inventory/' + item.inventory_id + '/expiration', {
+          method: 'PUT',
+          body: JSON.stringify({ expirationDate })
+        });
+        modal.remove();
+        await loadInventory(selectedRoomId);
+        renderInventory();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+  }
+
   // ============ INVENTORY ============
 
   async function loadInventory(roomId) {
@@ -387,7 +372,7 @@
 
   function renderInventory() {
     if (!inventory.length) {
-      el.inventoryContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-fridge"></i><h3>Sin productos</h3><p>No hay productos registrados para esta habitaci\u00f3n.</p></div>';
+      el.inventoryContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-wine"></i><h3>Sin productos</h3><p>No hay productos registrados para esta habitaci\u00f3n.</p></div>';
       return;
     }
 
@@ -413,6 +398,9 @@
 
       for (const item of items) {
         const isAgotado = item.quantity === 0;
+        const expStatus = getExpirationStatus(item.expiration_date);
+        const expLabel = item.expiration_date ? formatDateLocal(item.expiration_date) : 'No definida';
+
         html += '<div class="product-row-minibar' + (isAgotado ? ' agotado' : '') + '" data-product-id="' + item.product_id + '">' +
           '<div class="product-info">' +
             '<div class="product-name-text">' +
@@ -424,6 +412,14 @@
               ' <span class="product-detail-sep">|</span> ' +
               '<span class="product-qty-label">' + item.quantity + ' uds.</span>' +
             '</div>' +
+            '<div class="product-expiration-row">' +
+              '<span class="exp-indicator ' + expStatus.class + '"></span>' +
+              '<span class="exp-label">Vence: ' + expLabel + '</span>' +
+              '<span class="exp-days ' + expStatus.class + '">' + expStatus.label + '</span>' +
+              '<button class="btn-icon btn-edit-expiration" data-inventory-id="' + item.inventory_id + '" title="Editar fecha de vencimiento" style="margin-left:auto;font-size:14px;">' +
+                '<i class="ph-light ph-pencil"></i>' +
+              '</button>' +
+            '</div>' +
           '</div>' +
         '</div>';
       }
@@ -431,6 +427,14 @@
     }
 
     el.inventoryContainer.innerHTML = html;
+
+    el.inventoryContainer.querySelectorAll('.btn-edit-expiration').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const invId = Number(btn.dataset.inventoryId);
+        const item = inventory.find(function(i) { return i.inventory_id === invId; });
+        if (item) renderExpirationModal(item);
+      });
+    });
   }
 
   // ============ CONSUMPTION FORM ============
@@ -595,6 +599,19 @@
         el.previewModal.classList.add('visible');
         el.previewModal.setAttribute('aria-hidden', 'false');
         el.previewSendBtn.dataset.message = result.whatsappMessage;
+
+        fetch('/api/audit/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            moduleName: 'Minibares',
+            actionType: 'whatsapp_sent',
+            actionDescription: 'Envió consumo por WhatsApp',
+            roomId: selectedRoomId,
+            amount: result.total
+          })
+        }).catch(function() {});
       }
 
       // Reload inventory after consumption
@@ -869,12 +886,16 @@
     const typeLabels = {
       consumption: 'Consumo',
       restock: 'Reposici\u00f3n',
-      adjustment: 'Ajuste'
+      adjustment: 'Ajuste',
+      perdida: 'Perdida',
+      dano: 'Daño'
     };
     const typeIcons = {
       consumption: 'ph-light ph-shopping-bag',
       restock: 'ph-light ph-plus-square',
-      adjustment: 'ph-light ph-wrench'
+      adjustment: 'ph-light ph-wrench',
+      perdida: 'ph-light ph-warning-circle',
+      dano: 'ph-light ph-warning'
     };
     const typeClasses = {
       consumption: 'movement-consumption',
@@ -925,152 +946,6 @@
     }
   }
 
-  // ============ REPORTS ============
-
-  async function generateReport() {
-    const from = el.reportFrom.value;
-    const to = el.reportTo.value;
-
-    if (!from || !to) {
-      el.reportStatus.textContent = 'Selecciona fecha inicial y final.';
-      el.reportStatus.className = 'status error';
-      return;
-    }
-
-    el.reportResult.innerHTML = '<div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Generando reporte...</h3></div>';
-    el.reportStatus.textContent = '';
-    el.reportStatus.className = 'status';
-
-    try {
-      const data = await apiFetch('/api/minibar/reports?from=' + from + '&to=' + to);
-      renderReport(data);
-    } catch (err) {
-      el.reportResult.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
-      el.reportStatus.textContent = 'Error al generar reporte.';
-      el.reportStatus.className = 'status error';
-    }
-  }
-
-  function renderReport(data) {
-    const s = data.summary;
-    let html = '';
-
-    // Summary cards
-    html += '<div class="report-summary-cards">';
-    const cards = [
-      { label: 'Total consumido', value: formatCOP(s.totalAmount), icon: 'ph-light ph-currency-circle-dollar' },
-      { label: 'Productos consumidos', value: String(s.totalProducts), icon: 'ph-light ph-shopping-bag' },
-      { label: 'Movimientos', value: String(s.totalMovements), icon: 'ph-light ph-list-dashes' },
-      { label: 'Habitaciones', value: String(s.totalRoomsWithConsumption), icon: 'ph-light ph-bed' }
-    ];
-    for (const card of cards) {
-      html += '<div class="report-card">' +
-        '<div class="report-card-icon"><i class="' + card.icon + '"></i></div>' +
-        '<div class="report-card-value">' + card.value + '</div>' +
-        '<div class="report-card-label">' + card.label + '</div>' +
-      '</div>';
-    }
-    html += '</div>';
-
-    // Category breakdown
-    html += '<div class="report-section"><h3 class="report-section-title">Consumo por categor\u00eda</h3>';
-    for (const cat of s.categoryBreakdown) {
-      html += '<div class="report-row"><span class="report-row-label">' + cat.name + '</span><span class="report-row-value">' + formatCOP(cat.total) + '</span></div>';
-    }
-    html += '</div>';
-
-    // Floor breakdown
-    html += '<div class="report-section"><h3 class="report-section-title">Consumo por piso</h3>';
-    for (const f of s.floorBreakdown) {
-      html += '<div class="report-row"><span class="report-row-label">' + f.floorName + '</span><span class="report-row-value">' + formatCOP(f.total) + '</span></div>';
-    }
-    html += '</div>';
-
-    // Top 5 rooms
-    if (s.top5Rooms && s.top5Rooms.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">Top 5 habitaciones que m\u00e1s consumieron</h3>';
-      html += '<div class="report-ranking">';
-      s.top5Rooms.forEach((r, i) => {
-        html += '<div class="report-rank-item"><span class="report-rank-num">#' + (i + 1) + '</span><span class="report-rank-label">Habitaci\u00f3n ' + r.roomNumber + '</span><span class="report-rank-value">' + formatCOP(r.total) + '</span></div>';
-      });
-      html += '</div></div>';
-    }
-
-    // Most consumed products
-    if (s.mostConsumedProducts && s.mostConsumedProducts.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">Productos m\u00e1s consumidos</h3>';
-      html += '<div class="report-ranking">';
-      s.mostConsumedProducts.forEach((p, i) => {
-        html += '<div class="report-rank-item"><span class="report-rank-num">#' + (i + 1) + '</span><span class="report-rank-label">' + p.name + '</span><span class="report-rank-value">' + p.items + ' uds</span></div>';
-      });
-      html += '</div></div>';
-    }
-
-    // Products without consumption
-    if (s.noConsumptionProducts && s.noConsumptionProducts.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">Productos sin consumo</h3>';
-      html += '<p class="report-muted">' + s.noConsumptionProducts.map(p => p.name).join(', ') + '</p></div>';
-    }
-
-    // Rooms without consumption
-    if (s.noConsumptionRooms && s.noConsumptionRooms.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">Habitaciones sin consumo</h3>';
-      html += '<p class="report-muted">' + s.noConsumptionRooms.map(r => 'Hab. ' + r.room_number).join(', ') + '</p></div>';
-    }
-
-    // Observations
-    if (data.observations && data.observations.length) {
-      html += '<div class="report-section"><h3 class="report-section-title">Observaciones</h3><ul class="report-observations">';
-      for (const obs of data.observations) {
-        html += '<li>' + obs + '</li>';
-      }
-      html += '</ul></div>';
-    }
-
-    html += '<p class="report-generated-at">Generado: ' + new Date(s.generatedAt).toLocaleString('es-CO') + '</p>';
-
-    el.reportResult.innerHTML = html;
-    el.reportStatus.textContent = 'Reporte generado correctamente.';
-    el.reportStatus.className = 'status success';
-  }
-
-  async function downloadReportPdf() {
-    const from = el.reportFrom.value;
-    const to = el.reportTo.value;
-
-    if (!from || !to) {
-      el.reportStatus.textContent = 'Selecciona fecha inicial y final.';
-      el.reportStatus.className = 'status error';
-      return;
-    }
-
-    el.reportStatus.textContent = 'Generando PDF...';
-    el.reportStatus.className = 'status';
-
-    try {
-      const res = await fetch('/api/minibar/reports/pdf?from=' + from + '&to=' + to, {
-        credentials: 'same-origin'
-      });
-      if (!res.ok) throw new Error('Error al generar PDF');
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'informe-consumos-' + from + '-' + to + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      el.reportStatus.textContent = 'PDF descargado correctamente.';
-      el.reportStatus.className = 'status success';
-    } catch (err) {
-      el.reportStatus.textContent = 'Error: ' + err.message;
-      el.reportStatus.className = 'status error';
-    }
-  }
-
   // ============ WHATSAPP PREVIEW MODAL ============
 
   function openWhatsAppWithMessage(message) {
@@ -1088,18 +963,6 @@
 
   el.backToFloorsBtn.addEventListener('click', goBackToFloors);
   el.backToRoomsBtn.addEventListener('click', goBackToRooms);
-
-  // Dashboard
-  if (el.dashGoFloorsBtn) {
-    el.dashGoFloorsBtn.addEventListener('click', () => {
-      showView('view-floors');
-      updateBreadcrumb('view-floors');
-      renderFloors();
-    });
-  }
-  if (el.dashRefreshBtn) {
-    el.dashRefreshBtn.addEventListener('click', loadDashboard);
-  }
 
   // Tabs
   document.querySelectorAll('.room-tab').forEach((tab) => {
@@ -1126,10 +989,6 @@
 
   // History
   el.refreshHistoryBtn.addEventListener('click', loadAndRenderHistory);
-
-  // Reports
-  el.generateReportBtn.addEventListener('click', generateReport);
-  el.downloadReportPdfBtn.addEventListener('click', downloadReportPdf);
 
   // Preview modal
   el.closePreviewBtn.addEventListener('click', closePreviewModal);
@@ -1176,7 +1035,7 @@
   if (typeof setupThemeSwitcher === 'function') setupThemeSwitcher(document.getElementById('app-theme-switcher'));
   if (typeof setupLangSelector === 'function') setupLangSelector(document.getElementById('app-lang-selector'));
 
-  // Start with dashboard
-  goToDashboard();
+  // Start with floors
+  showView('view-floors');
   loadFloors();
 })();

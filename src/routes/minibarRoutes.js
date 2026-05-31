@@ -1,9 +1,11 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const PDFDocument = require("pdfkit");
+const { PDFReport, fmtDateTimeLong, CW, MARGIN, TEXT_LIGHT } = require("../pdfHelper");
+const ExcelJS = require("exceljs");
 const router = express.Router();
 const { query, getDbPool } = require("../config/db");
+const { logAudit, getClientIp, getDeviceInfo } = require("../auditLogger");
 
 function formatCOP(value) {
   const n = Number(value) || 0;
@@ -63,6 +65,7 @@ router.get("/inventory/:roomId", async (req, res) => {
       `SELECT
         rmi.id AS inventory_id,
         rmi.quantity,
+        rmi.expiration_date,
         mp.id AS product_id,
         mp.name AS product_name,
         mp.price AS product_price,
@@ -80,6 +83,26 @@ router.get("/inventory/:roomId", async (req, res) => {
   } catch (err) {
     console.error("Error fetching inventory:", err);
     res.status(500).json({ error: "Error al cargar inventario" });
+  }
+});
+
+// PUT /api/minibar/inventory/:inventoryId/expiration
+router.put("/inventory/:inventoryId/expiration", async (req, res) => {
+  try {
+    const inventoryId = Number(req.params.inventoryId);
+    const { expirationDate } = req.body;
+
+    if (!inventoryId) return res.status(400).json({ error: "ID de inventario inválido" });
+
+    await query(
+      "UPDATE room_minibar_inventory SET expiration_date = ? WHERE id = ?",
+      [expirationDate || null, inventoryId]
+    );
+
+    res.json({ success: true, message: "Fecha de vencimiento actualizada" });
+  } catch (err) {
+    console.error("Error updating expiration date:", err);
+    res.status(500).json({ error: "Error al actualizar fecha de vencimiento" });
   }
 });
 
@@ -185,6 +208,21 @@ router.post("/consumption", async (req, res) => {
       lines.push("");
       lines.push("Muchas gracias.");
 
+      logAudit({
+        userId,
+        userName,
+        userRole: req.session.user?.role,
+        moduleName: "Minibares",
+        actionType: "consumption_created",
+        actionDescription: "Registró consumo de " + consumptionDetails.map(d => d.name + " x" + d.quantity).join(", "),
+        roomId: Number(roomId),
+        floorId: Number(room.floor_id),
+        amount: totalGeneral,
+        newData: { items: consumptionDetails },
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+
       res.json({
         success: true,
         message: "Consumo registrado correctamente",
@@ -228,15 +266,16 @@ router.post("/restock", async (req, res) => {
         if (!productId || !qty || qty <= 0) continue;
 
         const [invRows] = await conn.query(
-          "SELECT quantity FROM room_minibar_inventory WHERE room_id = ? AND product_id = ?",
+          "SELECT quantity, expiration_date FROM room_minibar_inventory WHERE room_id = ? AND product_id = ?",
           [roomId, productId]
         );
         const currentQty = (invRows && invRows.length > 0) ? Number(invRows[0].quantity) : 0;
         const newQty = currentQty + qty;
 
+        const expDate = item.expirationDate || (invRows && invRows.length > 0 ? invRows[0].expiration_date : null);
         await conn.query(
-          "UPDATE room_minibar_inventory SET quantity = ? WHERE room_id = ? AND product_id = ?",
-          [newQty, roomId, productId]
+          "UPDATE room_minibar_inventory SET quantity = ?, expiration_date = ? WHERE room_id = ? AND product_id = ?",
+          [newQty, expDate || null, roomId, productId]
         );
 
         await conn.query(
@@ -260,6 +299,20 @@ router.post("/restock", async (req, res) => {
       }
 
       await conn.commit();
+
+      logAudit({
+        userId,
+        userName,
+        userRole: req.session?.user?.role,
+        moduleName: "Reposición",
+        actionType: "restock_created",
+        actionDescription: "Repuso " + restockDetails.map(d => d.name + " x" + d.quantity).join(", "),
+        roomId: Number(roomId),
+        newData: { items: restockDetails },
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+
       res.json({ success: true, message: "Reposici\u00f3n guardada correctamente", details: restockDetails });
     } catch (err) {
       await conn.rollback();
@@ -327,6 +380,20 @@ router.post("/adjust", async (req, res) => {
       }
 
       await conn.commit();
+
+      logAudit({
+        userId,
+        userName,
+        userRole: req.session?.user?.role,
+        moduleName: "Inventario",
+        actionType: "inventory_adjusted",
+        actionDescription: "Ajustó inventario: " + adjustDetails.map(d => d.name + " " + d.previousQty + "→" + d.newQty).join(", "),
+        roomId: Number(roomId),
+        newData: { items: adjustDetails },
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+
       res.json({ success: true, message: "Ajuste guardado correctamente", details: adjustDetails });
     } catch (err) {
       await conn.rollback();
@@ -539,6 +606,18 @@ router.get("/reports", async (req, res) => {
     const roomsWithConsumption = new Set(items.map(i => i.room_id));
     const totalRoomsWithConsumption = roomsWithConsumption.size;
 
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Reportes",
+      actionType: "report_generated",
+      actionDescription: "Generó reporte de consumos del " + from + " al " + to,
+      amount: totalAmount,
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
     res.json({
       items,
       summary: {
@@ -602,9 +681,7 @@ router.get("/reports/pdf", async (req, res) => {
       params
     );
 
-    if (!movements || movements.length === 0) {
-      return res.status(404).send("No hay consumos en el rango seleccionado.");
-    }
+    const hasData = movements && movements.length > 0;
 
     // Calculate summary
     const items = movements.map(m => ({
@@ -639,7 +716,7 @@ router.get("/reports/pdf", async (req, res) => {
     const prodMap = new Map();
     for (const i of items) {
       const key = i.product_id;
-      if (!prodMap.has(key)) prodMap.set(key, { productId: key, name: i.product_name, total: 0, items: 0 });
+      if (!prodMap.has(key)) prodMap.set(key, { productId: key, name: i.product_name, category: i.category_name, total: 0, items: 0 });
       const p = prodMap.get(key);
       p.total += i.lineTotal;
       p.items += Number(i.quantity_moved);
@@ -656,285 +733,345 @@ router.get("/reports/pdf", async (req, res) => {
     }
     const floorBreakdown = Array.from(floorMap.values()).sort((a, b) => b.total - a.total);
 
-    const consumedProductIds = new Set(items.map(i => i.product_id));
-    const allProducts = await query("SELECT id, name FROM minibar_products WHERE is_active = 1");
-    const noConsumptionProducts = allProducts.filter(p => !consumedProductIds.has(p.id));
-
-    const consumedRoomIds = new Set(items.map(i => i.room_id));
-    const allRoomsQ = await query("SELECT r.id, r.room_number, f.name AS floor_name FROM rooms r JOIN floors f ON f.id = r.floor_id");
-    const noConsumptionRooms = allRoomsQ.filter(r => !consumedRoomIds.has(r.id));
-
     const top5Rooms = roomBreakdown.slice(0, 5);
-    const bottom5Rooms = [...roomBreakdown].sort((a, b) => a.total - b.total).slice(0, 5);
-    const top2Floors = floorBreakdown.slice(0, 2);
-    const bottom2Floors = [...floorBreakdown].sort((a, b) => a.total - b.total).slice(0, 2);
     const mostConsumedProducts = productBreakdown.slice(0, 5);
-    const leastConsumedProducts = [...productBreakdown].sort((a, b) => a.items - b.items).slice(0, 5);
 
     // Generate PDF
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="informe-consumos-${from}-${to}.pdf"`);
 
-    const doc = new PDFDocument({ size: "A4", margin: 40 });
-    doc.pipe(res);
-
-    const pageWidth = doc.page.width;
-    const left = doc.page.margins.left;
-    const right = pageWidth - doc.page.margins.right;
-    const primaryColor = "#4D553D";
-
-    const logoPath = path.join(__dirname, "../../public/images/Logo_Nattivo_v1.png");
-    const hasLogo = fs.existsSync(logoPath);
-
-    let y = 40;
-    const logoW = 70;
-    const logoH = 70;
-
-    // Header with logo
-    if (hasLogo) {
-      doc.image(logoPath, right - logoW, y - 10, { width: logoW, height: logoH });
-    }
-
-    doc.font("Helvetica-Bold").fontSize(20);
-    doc.fillColor(primaryColor);
-    doc.text("INFORME DE CONSUMOS", left, y, { width: right - left - (hasLogo ? logoW + 12 : 0) });
-    y += 22;
-    doc.font("Helvetica").fontSize(11);
-    doc.fillColor("#666");
-    doc.text("Minibar — Nattivo Collection Hotel", left, y);
-    y += 28;
-
-    // Separator
-    doc.fillColor(primaryColor);
-    doc.rect(left, y, right - left, 2).fill();
-    y += 18;
-
-    // Info section
-    doc.font("Helvetica-Bold").fontSize(11);
-    doc.fillColor("#333");
-    doc.text("Rango de fechas:", left, y);
-    doc.font("Helvetica").fontSize(11);
-    doc.fillColor("#555");
-    doc.text(from + "  —  " + to, left + 100, y);
-    y += 18;
-
     const userDisplay = req.session?.user?.fullName || "Operador";
-    const now = new Date();
-    doc.font("Helvetica-Bold").fontSize(11);
-    doc.fillColor("#333");
-    doc.text("Generado:", left, y);
-    doc.font("Helvetica").fontSize(11);
-    doc.fillColor("#555");
-    doc.text(formatDate(now) + "  " + formatTime(now), left + 54, y);
-    doc.text("por " + userDisplay, left + 54, y + 14);
-    y += 34;
 
-    doc.font("Helvetica-Bold").fontSize(11);
-    doc.fillColor("#333");
-    doc.text("Resumen general", left, y);
-    y += 18;
+    const report = new PDFReport({
+      title: "INFORME DE CONSUMOS DE MINIBAR",
+      subtitle: "ChargeIt Minibar App \u2014 Nattivo Collection Hotel",
+      dateFrom: from,
+      dateTo: to,
+      userName: userDisplay,
+      skipCover: true,
+    });
 
-    // Summary cards
-    const cardW = (right - left - 16) / 3;
-    const cardData = [
+    report.pipe(res);
+
+    let y = report.addPageHeader();
+
+    // Extra header info: generation timestamp + user
+    const doc = report.doc;
+    doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_LIGHT);
+    doc.text('Generado: ' + fmtDateTimeLong(report.generatedAt) + ' por ' + userDisplay, MARGIN + 46, MARGIN + 24, { width: CW - 46 });
+    y = MARGIN + 44;
+
+    // === 1. RESUMEN GENERAL ===
+    y = report.addSectionTitle(1, "Resumen General", y);
+
+    const topFloorName = floorBreakdown[0]?.floorName || 'N/A';
+    const topRoomNum = roomBreakdown[0]?.roomNumber || 'N/A';
+    const topProductName = productBreakdown[0]?.name || 'N/A';
+
+    const execCards = [
       { label: "Total consumido", value: formatCOP(totalAmount) },
       { label: "Productos consumidos", value: String(totalProducts) },
-      { label: "Habitaciones con consumo", value: String(roomBreakdown.length) }
+      { label: "Habitaciones con consumo", value: String(roomBreakdown.length) },
+      { label: "Piso con mayor consumo", value: topFloorName },
+      { label: "Habitación con mayor consumo", value: topRoomNum },
+      { label: "Producto más consumido", value: topProductName },
     ];
+    y = report.drawExtendedSummaryCards(execCards, y);
 
-    for (let i = 0; i < cardData.length; i++) {
-      const cx = left + i * (cardW + 8);
-      doc.fillColor("#f5f5f0");
-      doc.roundedRect(cx, y, cardW, 48, 6).fill();
-      doc.fillColor(primaryColor);
-      doc.font("Helvetica-Bold").fontSize(10);
-      doc.text(cardData[i].label, cx + 8, y + 6, { width: cardW - 16 });
-      doc.font("Helvetica-Bold").fontSize(14);
-      doc.fillColor("#333");
-      doc.text(cardData[i].value, cx + 8, y + 24, { width: cardW - 16 });
-    }
-    y += 64;
+    // === 2. CONSUMO POR PISO ===
+    y = report.checkPageBreak(60, y);
+    y = report.addSectionTitle(2, "Consumo por Piso", y);
 
-    // Category breakdown
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Consumo por categor\u00eda", left, y);
-    y += 18;
+    if (hasData) {
+      const floorRoomCount = {};
+      for (const i of items) {
+        if (!floorRoomCount[i.floor_name]) floorRoomCount[i.floor_name] = new Set();
+        floorRoomCount[i.floor_name].add(i.room_number);
+      }
 
-    for (const cat of categoryBreakdown) {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text(cat.name, left, y);
-      doc.text(formatCOP(cat.total), right, y, { align: "right" });
-      y += 16;
-    }
-    y += 10;
-
-    // Top 5 rooms
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Top 5 habitaciones que m\u00e1s consumieron", left, y);
-    y += 18;
-
-    doc.font("Helvetica-Bold").fontSize(10);
-    doc.fillColor("#555");
-    doc.text("#", left, y);
-    doc.text("Habitaci\u00f3n", left + 20, y);
-    doc.text("Total", right, y, { align: "right" });
-    y += 14;
-
-    top5Rooms.forEach((r, idx) => {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text(String(idx + 1), left, y);
-      doc.text("Habitaci\u00f3n " + r.roomNumber, left + 20, y);
-      doc.text(formatCOP(r.total), right, y, { align: "right" });
-      y += 14;
-    });
-    y += 8;
-
-    // Bottom 5 rooms
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Top 5 habitaciones que menos consumieron", left, y);
-    y += 18;
-
-    doc.font("Helvetica-Bold").fontSize(10);
-    doc.fillColor("#555");
-    doc.text("#", left, y);
-    doc.text("Habitaci\u00f3n", left + 20, y);
-    doc.text("Total", right, y, { align: "right" });
-    y += 14;
-
-    bottom5Rooms.forEach((r, idx) => {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text(String(idx + 1), left, y);
-      doc.text("Habitaci\u00f3n " + r.roomNumber, left + 20, y);
-      doc.text(formatCOP(r.total), right, y, { align: "right" });
-      y += 14;
-    });
-    y += 8;
-
-    // Floor ranking
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Consumo por piso", left, y);
-    y += 18;
-
-    doc.font("Helvetica-Bold").fontSize(10);
-    doc.fillColor("#555");
-    doc.text("Piso", left, y);
-    doc.text("Total", right, y, { align: "right" });
-    y += 14;
-
-    for (const f of floorBreakdown) {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text(f.floorName, left, y);
-      doc.text(formatCOP(f.total), right, y, { align: "right" });
-      y += 14;
-    }
-    y += 8;
-
-    // Most consumed products
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Productos m\u00e1s consumidos", left, y);
-    y += 18;
-
-    doc.font("Helvetica-Bold").fontSize(10);
-    doc.fillColor("#555");
-    doc.text("#", left, y);
-    doc.text("Producto", left + 20, y);
-    doc.text("Cant.", right - 100, y, { align: "right" });
-    doc.text("Total", right, y, { align: "right" });
-    y += 14;
-
-    mostConsumedProducts.forEach((p, idx) => {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text(String(idx + 1), left, y);
-      doc.text(p.name, left + 20, y, { width: right - left - 140 });
-      doc.text(String(p.items), right - 100, y, { align: "right" });
-      doc.text(formatCOP(p.total), right, y, { align: "right" });
-      y += 14;
-    });
-    y += 8;
-
-    // Products without consumption
-    if (noConsumptionProducts.length > 0) {
-      doc.font("Helvetica-Bold").fontSize(12);
-      doc.fillColor(primaryColor);
-      doc.text("Productos sin consumo", left, y);
-      y += 18;
-
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      const prodNames = noConsumptionProducts.map(p => p.name).join(", ");
-      doc.text(prodNames, left, y, { width: right - left });
-      y += 14 + Math.ceil(prodNames.length / 80) * 12;
-      y += 8;
+      const floorRows = floorBreakdown.map(f => [
+        f.floorName,
+        String(floorRoomCount[f.floorName]?.size || 0),
+        formatCOP(f.total),
+      ]);
+      y = report.drawTable(
+        [
+          { label: 'Piso', align: 'left' },
+          { label: 'Habitaciones con consumo', align: 'center' },
+          { label: 'Total consumido', align: 'right' },
+        ],
+        floorRows,
+        y,
+        { widths: [CW * 0.25, CW * 0.38, CW * 0.37] }
+      );
+    } else {
+      y = report.addBodyText("No se registraron consumos durante el periodo seleccionado.", y);
     }
 
-    // Rooms without consumption
-    if (noConsumptionRooms.length > 0) {
-      doc.font("Helvetica-Bold").fontSize(12);
-      doc.fillColor(primaryColor);
-      doc.text("Habitaciones sin consumo", left, y);
-      y += 18;
+    // === 3. TOP HABITACIONES CON MAYOR CONSUMO ===
+    if (hasData && top5Rooms.length > 0) {
+      y = report.checkPageBreak(100, y);
+      y = report.addSectionTitle(3, "Top Habitaciones con Mayor Consumo", y);
 
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      const roomNames = noConsumptionRooms.map(r => "Hab. " + r.room_number).join(", ");
-      doc.text(roomNames, left, y, { width: right - left });
-      y += 14 + Math.ceil(roomNames.length / 80) * 12;
-      y += 8;
+      const topRoomRows = top5Rooms.map((r, i) => [
+        String(i + 1),
+        r.roomNumber,
+        r.floorName,
+        formatCOP(r.total),
+      ]);
+      y = report.drawTable(
+        [
+          { label: '#', align: 'center' },
+          { label: 'Habitación', align: 'center' },
+          { label: 'Piso', align: 'center' },
+          { label: 'Total', align: 'right' },
+        ],
+        topRoomRows,
+        y,
+        { widths: [CW * 0.1, CW * 0.25, CW * 0.3, CW * 0.35] }
+      );
     }
 
-    // Observations
-    if (y > doc.page.height - 120) {
-      doc.addPage();
-      y = 40;
+    // === 4. PRODUCTOS MÁS CONSUMIDOS ===
+    if (hasData && mostConsumedProducts.length > 0) {
+      y = report.checkPageBreak(100, y);
+      y = report.addSectionTitle(4, "Productos Más Consumidos", y);
+
+      const prodRows = mostConsumedProducts.map((p, i) => [
+        String(i + 1),
+        p.name,
+        String(p.items),
+        formatCOP(p.total),
+      ]);
+      y = report.drawTable(
+        [
+          { label: '#', align: 'center' },
+          { label: 'Producto', align: 'left' },
+          { label: 'Cantidad', align: 'center' },
+          { label: 'Valor total', align: 'right' },
+        ],
+        prodRows,
+        y,
+        { widths: [CW * 0.08, CW * 0.45, CW * 0.17, CW * 0.3] }
+      );
     }
 
-    doc.fillColor(primaryColor);
-    doc.rect(left, y, right - left, 2).fill();
-    y += 18;
-
-    doc.font("Helvetica-Bold").fontSize(12);
-    doc.fillColor(primaryColor);
-    doc.text("Observaciones", left, y);
-    y += 22;
-
-    const observations = [];
-    if (roomBreakdown.length > 0) observations.push("La habitaci\u00f3n con mayor consumo fue la habitaci\u00f3n " + roomBreakdown[0].roomNumber + ".");
-    if (floorBreakdown.length > 0) observations.push("El piso con mayor consumo fue " + floorBreakdown[0].floorName + ".");
-    if (productBreakdown.length > 0) observations.push("El producto m\u00e1s consumido fue " + productBreakdown[0].name + ".");
-    if (categoryBreakdown.length > 0) observations.push("La categor\u00eda con mayor consumo fue " + categoryBreakdown[0].name + ".");
-    if (noConsumptionRooms.length > 0) observations.push("Se encontraron " + noConsumptionRooms.length + " habitaciones sin consumo durante el periodo seleccionado.");
-    observations.push("El total consumido durante el periodo fue de " + formatCOP(totalAmount) + ".");
-
-    for (const obs of observations) {
-      doc.font("Helvetica").fontSize(10);
-      doc.fillColor("#333");
-      doc.text("\u2022  " + obs, left, y, { width: right - left });
-      y += 18;
-    }
-
-    // Footer
-    doc.font("Helvetica").fontSize(8);
-    doc.fillColor("#999");
-    doc.text("Nattivo Collection Hotel — ChargeIt Minibar App", left, doc.page.height - 30, {
-      width: right - left,
-      align: "center"
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Reportes",
+      actionType: "pdf_exported",
+      actionDescription: "Exportó reporte de consumos en PDF del " + from + " al " + to,
+      amount: totalAmount,
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
     });
 
-    doc.end();
+    report.finalize();
   } catch (err) {
     console.error("Error generating report PDF:", err);
     if (!res.headersSent) {
       res.status(500).send("Error al generar PDF");
+    }
+  }
+});
+
+// GET /api/minibar/reports/excel
+router.get("/reports/excel", async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    if (!from || !to) {
+      return res.status(400).json({ error: "Debes seleccionar fecha inicial y final" });
+    }
+
+    const params = [from + " 00:00:00", to + " 23:59:59"];
+
+    const movements = await query(
+      `SELECT
+        mm.id, mm.room_id, mm.product_id, mm.quantity_moved, mm.user_name, mm.created_at,
+        mp.name AS product_name, mp.price AS product_price,
+        mc.name AS category_name, r.room_number, f.name AS floor_name
+      FROM minibar_movements mm
+      JOIN minibar_products mp ON mp.id = mm.product_id
+      JOIN minibar_categories mc ON mc.id = mp.category_id
+      JOIN rooms r ON r.id = mm.room_id
+      JOIN floors f ON f.id = r.floor_id
+      WHERE mm.movement_type = 'consumption'
+        AND mm.created_at >= ?
+        AND mm.created_at <= ?
+      ORDER BY mm.created_at DESC`,
+      params
+    );
+
+    if (!movements || movements.length === 0) {
+      return res.status(404).send("No hay consumos en el rango seleccionado.");
+    }
+
+    const items = movements.map(m => ({
+      ...m,
+      lineTotal: Number(m.quantity_moved) * Number(m.product_price || 0)
+    }));
+
+    const totalAmount = items.reduce((s, i) => s + i.lineTotal, 0);
+    const totalProducts = items.reduce((s, i) => s + Number(i.quantity_moved), 0);
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "ChargeIt Minibar";
+    const primaryColorHex = "4D553D";
+
+    function styleHeader(ws, headers) {
+      const row = ws.addRow(headers);
+      row.font = { bold: true, color: { argb: "FFFFFF" }, size: 11, name: "Calibri" };
+      row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: primaryColorHex } };
+      row.alignment = { horizontal: "center", vertical: "middle" };
+      row.height = 22;
+      return row;
+    }
+
+    function addTitle(ws, title, mergeTo) {
+      const row = ws.addRow([title]);
+      row.font = { bold: true, size: 14, color: { argb: primaryColorHex }, name: "Calibri" };
+      if (mergeTo) ws.mergeCells(1, 1, 1, mergeTo);
+      row.height = 28;
+    }
+
+    // Sheet 1: Resumen general
+    const ws1 = workbook.addWorksheet("Resumen general");
+    addTitle(ws1, "INFORME DE CONSUMOS", 4);
+    ws1.addRow([]);
+    const displayFrom = new Date(from).toLocaleDateString("es-CO");
+    const displayTo = new Date(to).toLocaleDateString("es-CO");
+    ws1.addRow(["Rango de fechas:", displayFrom + " — " + displayTo]);
+    ws1.addRow(["Generado:", new Date().toLocaleString("es-CO")]);
+    ws1.addRow(["Usuario:", req.session?.user?.fullName || "Operador"]);
+    ws1.addRow([]);
+
+    styleHeader(ws1, ["Indicador", "Valor"]);
+    ws1.addRow(["Total consumido", "$" + Math.round(totalAmount).toLocaleString("es-CO") + " COP"]);
+    ws1.addRow(["Productos consumidos", totalProducts]);
+    ws1.addRow(["Movimientos", items.length]);
+    const roomsWithConsumption = new Set(items.map(i => i.room_id));
+    ws1.addRow(["Habitaciones con consumo", roomsWithConsumption.size]);
+    ws1.getColumn(1).width = 25;
+    ws1.getColumn(2).width = 30;
+
+    // Sheet 2: Detalle de consumos
+    const ws2 = workbook.addWorksheet("Detalle de consumos");
+    styleHeader(ws2, ["Fecha", "Hora", "Piso", "Habitación", "Producto", "Categoría", "Cantidad", "Precio unitario", "Total", "Usuario"]);
+    for (const i of items) {
+      const d = new Date(i.created_at);
+      ws2.addRow([
+        d.toLocaleDateString("es-CO"),
+        d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }),
+        i.floor_name,
+        i.room_number,
+        i.product_name,
+        i.category_name,
+        Number(i.quantity_moved),
+        Number(i.product_price),
+        i.lineTotal,
+        i.user_name || ""
+      ]);
+    }
+    ws2.getColumn(1).width = 14;
+    ws2.getColumn(2).width = 10;
+    ws2.getColumn(3).width = 12;
+    ws2.getColumn(4).width = 12;
+    ws2.getColumn(5).width = 22;
+    ws2.getColumn(6).width = 16;
+    ws2.getColumn(7).width = 10;
+    ws2.getColumn(8).width = 16;
+    ws2.getColumn(9).width = 16;
+    ws2.getColumn(10).width = 20;
+
+    // Sheet 3: Top 10 habitaciones
+    const ws3 = workbook.addWorksheet("Top 10 habitaciones");
+    const roomMap = new Map();
+    for (const i of items) {
+      const key = i.room_id;
+      if (!roomMap.has(key)) roomMap.set(key, { roomNumber: i.room_number, floorName: i.floor_name, total: 0, items: 0 });
+      const rm = roomMap.get(key);
+      rm.total += i.lineTotal;
+      rm.items += Number(i.quantity_moved);
+    }
+    const topRooms = Array.from(roomMap.values()).sort((a, b) => b.total - a.total).slice(0, 10);
+
+    styleHeader(ws3, ["Posición", "Habitación", "Piso", "Cantidad total", "Valor total"]);
+    topRooms.forEach((rm, i) => {
+      ws3.addRow([i + 1, rm.roomNumber, rm.floorName, rm.items, Number(rm.total)]);
+    });
+    ws3.getColumn(1).width = 10;
+    ws3.getColumn(2).width = 14;
+    ws3.getColumn(3).width = 12;
+    ws3.getColumn(4).width = 14;
+    ws3.getColumn(5).width = 16;
+
+    // Sheet 4: Ranking de pisos
+    const ws4 = workbook.addWorksheet("Ranking de pisos");
+    const floorMap = new Map();
+    for (const i of items) {
+      if (!floorMap.has(i.floor_name)) floorMap.set(i.floor_name, { floorName: i.floor_name, total: 0, items: 0 });
+      const f = floorMap.get(i.floor_name);
+      f.total += i.lineTotal;
+      f.items += Number(i.quantity_moved);
+    }
+    const floorsArr = Array.from(floorMap.values()).sort((a, b) => b.total - a.total);
+    const grandTotal = totalAmount || 1;
+
+    styleHeader(ws4, ["Posición", "Piso", "Cantidad total", "Valor total", "Porcentaje"]);
+    floorsArr.forEach((f, i) => {
+      const pct = Math.round((f.total / grandTotal) * 100);
+      ws4.addRow([i + 1, f.floorName, f.items, Number(f.total), pct + "%"]);
+    });
+    ws4.getColumn(1).width = 10;
+    ws4.getColumn(2).width = 14;
+    ws4.getColumn(3).width = 14;
+    ws4.getColumn(4).width = 16;
+    ws4.getColumn(5).width = 12;
+
+    // Sheet 5: Ranking de productos
+    const ws5 = workbook.addWorksheet("Ranking de productos");
+    const prodMap = new Map();
+    for (const i of items) {
+      if (!prodMap.has(i.product_id)) prodMap.set(i.product_id, { name: i.product_name, category: i.category_name, total: 0, items: 0 });
+      const p = prodMap.get(i.product_id);
+      p.total += i.lineTotal;
+      p.items += Number(i.quantity_moved);
+    }
+    const productsArr = Array.from(prodMap.values()).sort((a, b) => b.total - a.total);
+
+    styleHeader(ws5, ["Posición", "Producto", "Categoría", "Cantidad total", "Valor total"]);
+    productsArr.forEach((p, i) => {
+      ws5.addRow([i + 1, p.name, p.category, p.items, Number(p.total)]);
+    });
+    ws5.getColumn(1).width = 10;
+    ws5.getColumn(2).width = 22;
+    ws5.getColumn(3).width = 16;
+    ws5.getColumn(4).width = 14;
+    ws5.getColumn(5).width = 16;
+
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Reportes",
+      actionType: "excel_exported",
+      actionDescription: "Exportó reporte de consumos en Excel del " + from + " al " + to,
+      amount: totalAmount,
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="informe-consumos-${from}-${to}.xlsx"`);
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error("Error generating consumption Excel:", err);
+    if (!res.headersSent) {
+      res.status(500).send("Error al generar Excel");
     }
   }
 });

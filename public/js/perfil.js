@@ -139,22 +139,6 @@
     $("profile-avatar-overlay").addEventListener("click", handlePhotoClick);
     $("profile-photo-input").addEventListener("change", handlePhotoChange);
 
-    // Menu toggle
-    const toggle = $("menu-toggle");
-    const sidebar = document.querySelector(".sidebar");
-    const backdrop = $("sidebar-backdrop");
-    if (toggle && sidebar) {
-      toggle.addEventListener("click", function () {
-        sidebar.classList.toggle("sidebar-open");
-        if (backdrop) backdrop.classList.toggle("backdrop-visible");
-      });
-      if (backdrop) {
-        backdrop.addEventListener("click", function () {
-          sidebar.classList.remove("sidebar-open");
-          backdrop.classList.remove("backdrop-visible");
-        });
-      }
-    }
   }
 
   if (document.readyState === "loading") {

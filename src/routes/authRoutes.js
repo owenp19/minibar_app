@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { getDbPool } = require("../config/db");
+const { logAudit, getClientIp, getDeviceInfo } = require("../auditLogger");
 
 const router = express.Router();
 
@@ -83,6 +84,18 @@ router.post("/register", async (req, res, next) => {
       role: "operator"
     };
 
+    logAudit({
+      userId: result.insertId,
+      userName: fullName,
+      userRole: "operator",
+      moduleName: "Autenticación",
+      actionType: "login",
+      actionDescription: "Registro de nuevo usuario",
+      newData: { email, fullName, role: "operator" },
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
     return res.redirect("/app");
   } catch (err) {
     return next(err);
@@ -128,6 +141,17 @@ router.post("/login", async (req, res, next) => {
     if (remember) {
       req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 7;
     }
+
+    logAudit({
+      userId: user.id,
+      userName: user.full_name,
+      userRole: user.role,
+      moduleName: "Autenticación",
+      actionType: "login",
+      actionDescription: "Inicio de sesión exitoso",
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
 
     return res.redirect("/app");
   } catch (err) {
@@ -243,6 +267,35 @@ router.put("/profile", requireLogin, upload.single("avatar"), async (req, res, n
       params
     );
 
+    const user = req.session.user;
+
+    if (req.file) {
+      logAudit({
+        userId: user.id,
+        userName: user.fullName,
+        userRole: user.role,
+        moduleName: "Perfil",
+        actionType: "profile_photo_changed",
+        actionDescription: "Cambió su foto de perfil",
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+    }
+
+    if (fullName || email || phone) {
+      logAudit({
+        userId: user.id,
+        userName: user.fullName,
+        userRole: user.role,
+        moduleName: "Perfil",
+        actionType: "profile_updated",
+        actionDescription: "Actualizó su información de perfil",
+        newData: { fullName: fullName?.trim(), email: email?.trim(), phone: phone || undefined },
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+    }
+
     res.json({ message: "Perfil actualizado correctamente." });
   } catch (err) {
     next(err);
@@ -250,7 +303,20 @@ router.put("/profile", requireLogin, upload.single("avatar"), async (req, res, n
 });
 
 router.post("/logout", (req, res) => {
+  const user = req.session.user;
   req.session.destroy(() => {
+    if (user) {
+      logAudit({
+        userId: user.id,
+        userName: user.fullName,
+        userRole: user.role,
+        moduleName: "Autenticación",
+        actionType: "logout",
+        actionDescription: "Cierre de sesión",
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+    }
     res.clearCookie("connect.sid");
     res.redirect("/");
   });

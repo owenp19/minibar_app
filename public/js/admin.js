@@ -108,7 +108,7 @@
     if (data.recentMovements && data.recentMovements.length) {
       html += '<div class="report-section"><h3 class="report-section-title">&Uacute;ltimos movimientos</h3>';
       html += '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Habitaci&oacute;n</th><th>Cant.</th><th>Usuario</th></tr></thead><tbody>';
-      const typeLabels = { consumption: 'Consumo', restock: 'Reposici&oacute;n', adjustment: 'Ajuste' };
+      const typeLabels = { consumption: 'Consumo', restock: 'Reposici&oacute;n', adjustment: 'Ajuste', perdida: 'Perdida', dano: 'Daño' };
       for (const m of data.recentMovements) {
         const date = new Date(m.created_at);
         const dateStr = date.toLocaleDateString('es-CO') + ' ' + date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });

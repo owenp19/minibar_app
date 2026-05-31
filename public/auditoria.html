@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditoría – ChargeIt Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
+            <span id="user-initials"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Operador</div>
+            <div class="sidebar-user-role">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/dashboard" class="nav-item">
+            <i class="ph-light ph-chart-pie nav-icon"></i>
+            <span class="nav-label">Dashboard</span>
+          </a>
+          <a href="/app/minibar" class="nav-item">
+            <i class="ph-light ph-wine nav-icon"></i>
+            <span class="nav-label">Minibares</span>
+          </a>
+          <a href="/app/admin" class="nav-item">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label">Admin</span>
+          </a>
+          <a href="/unlock.html" class="nav-item">
+            <i class="ph-light ph-key nav-icon"></i>
+            <span class="nav-label">Desbloqueo</span>
+          </a>
+          <a href="/app/perdidas" class="nav-item">
+            <i class="ph-light ph-chart-bar nav-icon"></i>
+            <span class="nav-label">Pérdidas</span>
+          </a>
+          <a href="/app/reportes" class="nav-item">
+            <i class="ph-light ph-file-text nav-icon"></i>
+            <span class="nav-label">Reportes</span>
+          </a>
+          <a href="/app/auditoria" class="nav-item nav-item-active" aria-current="page">
+            <i class="ph-light ph-clipboard-text nav-icon"></i>
+            <span class="nav-label">Auditoría</span>
+          </a>
+          <a href="/perfil" class="nav-item">
+            <i class="ph-light ph-user nav-icon"></i>
+            <span class="nav-label">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ph-light ph-gear nav-icon"></i>
+            <span class="nav-label">Configuración</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-credit">
+          <span>v1.0.1</span><br>
+          <span>Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ph-light ph-sign-out nav-icon"></i>
+            <span class="nav-label">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="ph-light ph-list"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div id="breadcrumb">
+            <span class="crumb">
+              <i class="ph-light ph-house"></i>
+              <span class="crumb-current">Auditoría</span>
+            </span>
+          </div>
+
+          <h1>
+            <i class="ph-light ph-clipboard-text" style="margin-right:8px;"></i>
+            <span>Auditoría por usuario</span>
+          </h1>
+
+          <p id="page-description">Consulta detallada de todas las acciones realizadas en el sistema.</p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ph-light ph-sun"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ph-light ph-moon"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Summary Cards -->
+      <section class="audit-summary" id="audit-summary">
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-activity"></i></div>
+          <div class="summary-card-value" id="summary-total">0</div>
+          <div class="summary-card-label">Acciones totales</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-user"></i></div>
+          <div class="summary-card-value" id="summary-top-user">—</div>
+          <div class="summary-card-label">Usuario con más acciones</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-puzzle-piece"></i></div>
+          <div class="summary-card-value" id="summary-top-module">—</div>
+          <div class="summary-card-label">Módulo con más actividad</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-shopping-bag"></i></div>
+          <div class="summary-card-value" id="summary-consumptions">0</div>
+          <div class="summary-card-label">Consumos registrados</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-plus-square"></i></div>
+          <div class="summary-card-value" id="summary-restocks">0</div>
+          <div class="summary-card-label">Reposiciones registradas</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-warning-circle"></i></div>
+          <div class="summary-card-value" id="summary-losses">0</div>
+          <div class="summary-card-label">Pérdidas registradas</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-file-text"></i></div>
+          <div class="summary-card-value" id="summary-reports">0</div>
+          <div class="summary-card-label">Reportes generados</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon"><i class="ph-light ph-clock"></i></div>
+          <div class="summary-card-value summary-card-value-sm" id="summary-last-action">—</div>
+          <div class="summary-card-label">Última acción</div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="card" style="margin-bottom:16px;">
+        <div class="audit-filters">
+          <div class="audit-filter-group">
+            <label>Fecha inicial</label>
+            <input type="date" class="admin-input" id="filter-from" />
+          </div>
+          <div class="audit-filter-group">
+            <label>Fecha final</label>
+            <input type="date" class="admin-input" id="filter-to" />
+          </div>
+          <div class="audit-filter-group">
+            <label>Usuario</label>
+            <select class="admin-input" id="filter-user">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="audit-filter-group">
+            <label>Módulo</label>
+            <select class="admin-input" id="filter-module">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="audit-filter-group">
+            <label>Tipo de acción</label>
+            <select class="admin-input" id="filter-action">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="audit-filter-group">
+            <label>Búsqueda</label>
+            <input type="text" class="admin-input" id="filter-search" placeholder="Buscar en auditoría..." />
+          </div>
+          <div class="audit-filter-actions">
+            <button class="btn-primary btn-sm" id="filter-apply-btn">
+              <i class="ph-light ph-magnifying-glass"></i>
+              <span>Filtrar</span>
+            </button>
+            <button class="btn-ghost btn-sm" id="filter-clear-btn">
+              <i class="ph-light ph-x"></i>
+              <span>Limpiar</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export Buttons -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:flex-end;">
+        <button class="btn-secondary btn-sm" id="export-pdf-btn">
+          <i class="ph-light ph-file-pdf"></i>
+          <span>Exportar PDF</span>
+        </button>
+        <button class="btn-secondary btn-sm" id="export-excel-btn">
+          <i class="ph-light ph-file"></i>
+          <span>Exportar Excel</span>
+        </button>
+      </div>
+
+      <!-- Audit Table -->
+      <section class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2 class="card-title">
+              <i class="ph-light ph-clipboard-text" style="margin-right:8px;"></i>
+              <span>Registros de auditoría</span>
+            </h2>
+            <p class="card-subtitle" id="audit-subtitle">Historial de acciones del sistema</p>
+          </div>
+          <div class="card-head-actions" id="audit-pagination-top"></div>
+        </div>
+        <div id="audit-content">
+          <div class="empty-state">
+            <i class="ph-light ph-clipboard-text"></i>
+            <h3>Cargando...</h3>
+            <p>Obteniendo registros de auditoría.</p>
+          </div>
+        </div>
+        <div id="audit-pagination-bottom" class="audit-pagination"></div>
+      </section>
+
+      <div id="audit-status" class="status" style="margin-top:8px;"></div>
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detail-modal" aria-hidden="true">
+    <div class="modal-content modal-content-lg">
+      <div class="modal-header">
+        <h3>Detalle de auditoría</h3>
+        <button class="modal-close-btn" id="close-detail-btn" aria-label="Cerrar">
+          <i class="ph-light ph-x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="detail-body">
+        <div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost btn-sm" id="close-detail-btn2">
+          <span>Cerrar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/auditoria.js"></script>
+</body>
+</html>

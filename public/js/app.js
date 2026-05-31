@@ -1324,6 +1324,63 @@ function setupUnlockEvents() {
   }
 }
 
+/* ---------- Notification Nav ---------- */
+
+async function loadNotificationCount() {
+  try {
+    const data = await fetch("/api/notifications/unread-count", { credentials: "include" });
+    if (!data.ok) return 0;
+    const json = await data.json();
+    return json.count || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function updateNotificationBadge() {
+  const badge = document.getElementById("notif-badge");
+  if (!badge) return;
+  loadNotificationCount().then(function(count) {
+    if (count > 0) {
+      badge.textContent = count > 99 ? "99+" : count;
+      badge.style.display = "";
+    } else {
+      badge.style.display = "none";
+    }
+  });
+}
+
+function injectNotificationsNav() {
+  var nav = document.querySelector(".sidebar-nav");
+  if (!nav) return;
+
+  var existingLink = document.getElementById("nav-notifications");
+
+  if (!existingLink) {
+    var perfilLink = nav.querySelector('a[href="/perfil"]');
+    if (!perfilLink) return;
+
+    var notifLink = document.createElement("a");
+    notifLink.href = "/app/notificaciones";
+    notifLink.className = "nav-item";
+    notifLink.id = "nav-notifications";
+    notifLink.innerHTML =
+      '<i class="ph-light ph-bell nav-icon"></i>' +
+      '<span class="nav-label">Notificaciones</span>' +
+      '<span class="nav-badge" id="notif-badge" style="display:none;"></span>';
+
+    perfilLink.parentNode.insertBefore(notifLink, perfilLink);
+  }
+
+  updateNotificationBadge();
+
+  // Re-check every 2 minutes
+  if (!window._notifIntervalSet) {
+    setInterval(updateNotificationBadge, 120000);
+    window._notifIntervalSet = true;
+  }
+}
+
 /* =========================
    Init
    ========================= */
@@ -1335,6 +1392,7 @@ async function init() {
   setupLangSelector(document.getElementById("app-lang-selector"));
 
   loadCurrentUser();
+  injectNotificationsNav();
 
   // Consumo: solo si existen los elementos
   if ($("room-select")) await loadRooms({ clear: true });

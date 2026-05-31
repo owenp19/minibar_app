@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const { query, getDbPool } = require("../config/db");
+const { logAudit, getClientIp, getDeviceInfo } = require("../auditLogger");
 
 const router = express.Router();
 
@@ -45,6 +46,18 @@ router.post("/products", async (req, res) => {
       );
     }
 
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Productos",
+      actionType: "product_created",
+      actionDescription: "Creó el producto " + name.trim(),
+      newData: { name: name.trim(), price, categoryId, defaultQuantity: defaultQuantity || 1 },
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
     res.json({ success: true, id: result.insertId, message: "Producto creado y agregado a todas las habitaciones." });
   } catch (err) {
     console.error("Error creating product:", err);
@@ -57,6 +70,9 @@ router.put("/products/:id", async (req, res) => {
   try {
     const { name, price, categoryId, defaultQuantity, displayOrder, isActive } = req.body;
     const productId = req.params.id;
+
+    const [oldRows] = await query("SELECT name, price, category_id, default_quantity, is_active FROM minibar_products WHERE id = ?", [productId]);
+    const oldProduct = oldRows && oldRows[0] ? oldRows[0] : null;
 
     const sets = [];
     const params = [];
@@ -71,6 +87,26 @@ router.put("/products/:id", async (req, res) => {
 
     params.push(productId);
     await query(`UPDATE minibar_products SET ${sets.join(", ")} WHERE id = ?`, params);
+
+    const actionType = price !== undefined && (oldProduct && Number(oldProduct.price) !== Number(price)) ? "price_updated" : "product_updated";
+    const actionDesc = actionType === "price_updated"
+      ? "Actualizó el precio de " + (name || oldProduct?.name) + ": " + oldProduct?.price + " → " + price
+      : "Editó el producto " + (name || oldProduct?.name);
+
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Productos",
+      actionType,
+      actionDescription: actionDesc,
+      productId: Number(productId),
+      previousData: oldProduct ? { name: oldProduct.name, price: oldProduct.price, categoryId: oldProduct.category_id } : null,
+      newData: { name: name?.trim(), price, categoryId },
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
     res.json({ success: true, message: "Producto actualizado correctamente." });
   } catch (err) {
     console.error("Error updating product:", err);
@@ -81,7 +117,22 @@ router.put("/products/:id", async (req, res) => {
 // DELETE /api/admin/products/:id — soft-delete (set inactive)
 router.delete("/products/:id", async (req, res) => {
   try {
+    const [oldRows] = await query("SELECT name FROM minibar_products WHERE id = ?", [req.params.id]);
     await query("UPDATE minibar_products SET is_active = 0 WHERE id = ?", [req.params.id]);
+
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Productos",
+      actionType: "product_disabled",
+      actionDescription: "Desactivó el producto " + (oldRows[0]?.name || "#" + req.params.id),
+      productId: Number(req.params.id),
+      previousData: oldRows[0] || null,
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
     res.json({ success: true, message: "Producto desactivado correctamente." });
   } catch (err) {
     console.error("Error deleting product:", err);
@@ -405,6 +456,25 @@ router.post("/movements/:id/void", async (req, res) => {
       );
 
       await conn.commit();
+
+      logAudit({
+        userId: req.session?.user?.id,
+        userName: req.session?.user?.fullName,
+        userRole: req.session?.user?.role,
+        moduleName: "Minibares",
+        actionType: "record_voided",
+        actionDescription: "Anuló movimiento #" + movementId + " (" + productName + ")",
+        roomId: movement.room_id,
+        floorId: movement.floor_id || null,
+        productId: movement.product_id,
+        quantityBefore: movement.quantity_before,
+        quantityAfter: restoreQty,
+        previousData: { movement },
+        newData: { restoredQty: restoreQty },
+        ipAddress: getClientIp(req),
+        deviceInfo: getDeviceInfo(req)
+      });
+
       res.json({ success: true, message: "Movimiento anulado correctamente. Inventario restaurado." });
     } catch (err) {
       await conn.rollback();

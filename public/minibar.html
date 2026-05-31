@@ -40,8 +40,12 @@
         </div>
 
         <nav class="sidebar-nav">
+          <a href="/app/dashboard" class="nav-item">
+            <i class="ph-light ph-chart-pie nav-icon"></i>
+            <span class="nav-label">Dashboard</span>
+          </a>
           <a href="/app/minibar" class="nav-item nav-item-active" aria-current="page">
-            <i class="ph-light ph-fridge nav-icon"></i>
+            <i class="ph-light ph-wine nav-icon"></i>
             <span class="nav-label" data-i18n="navMinibars">Minibares</span>
           </a>
           <a href="/app/admin" class="nav-item">
@@ -51,6 +55,23 @@
           <a href="/unlock.html" class="nav-item">
             <i class="ph-light ph-key nav-icon"></i>
             <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
+          </a>
+          <a href="/app/perdidas" class="nav-item">
+            <i class="ph-light ph-chart-bar nav-icon"></i>
+            <span class="nav-label">Pérdidas</span>
+          </a>
+          <a href="/app/reportes" class="nav-item">
+            <i class="ph-light ph-file-text nav-icon"></i>
+            <span class="nav-label">Reportes</span>
+          </a>
+          <a href="/app/auditoria" class="nav-item">
+            <i class="ph-light ph-clipboard-text nav-icon"></i>
+            <span class="nav-label">Auditoría</span>
+          </a>
+          <a href="/app/notificaciones" class="nav-item" id="nav-notifications">
+            <i class="ph-light ph-bell nav-icon"></i>
+            <span class="nav-label">Notificaciones</span>
+            <span class="nav-badge" id="notif-badge" style="display:none;"></span>
           </a>
           <a href="/perfil" class="nav-item">
             <i class="ph-light ph-user nav-icon"></i>
@@ -93,7 +114,7 @@
           </div>
 
           <h1>
-            <i class="ph-light ph-fridge minibar-header-icon"></i>
+            <i class="ph-light ph-wine" style="margin-right:8px;"></i>
             <span data-i18n="minibarTitle">Gesti&oacute;n de Minibar</span>
           </h1>
 
@@ -117,32 +138,6 @@
           </div>
         </div>
       </header>
-
-      <!-- VIEW 0: Dashboard -->
-      <section id="view-dashboard" class="card view-section">
-        <div class="card-head">
-          <div class="card-head-left">
-            <h2 class="card-title">
-              <i class="ph-light ph-layout" style="margin-right:8px;"></i>
-              <span>Dashboard</span>
-            </h2>
-            <p class="card-subtitle">Resumen r&aacute;pido del estado del minibar.</p>
-          </div>
-          <div class="card-head-actions">
-            <button class="btn-primary btn-sm" type="button" id="dash-go-floors-btn">
-              <i class="ph-light ph-buildings"></i>
-              <span>Ir a pisos</span>
-            </button>
-            <button class="btn-secondary btn-sm" type="button" id="dash-refresh-btn">
-              <i class="ph-light ph-arrows-clockwise"></i>
-              <span>Actualizar</span>
-            </button>
-          </div>
-        </div>
-        <div id="dashboard-container">
-          <!-- populated by JS -->
-        </div>
-      </section>
 
       <!-- VIEW 1: Floor Selection -->
       <section id="view-floors" class="card view-section">
@@ -189,7 +184,7 @@
         <div class="card-head">
           <div class="card-head-left">
             <h2 class="card-title">
-              <i class="ph-light ph-fridge" style="margin-right:8px;"></i>
+              <i class="ph-light ph-wine" style="margin-right:8px;"></i>
               <span data-i18n="minibarRoomDetail">Detalle de habitaci&oacute;n</span>
             </h2>
             <p class="card-subtitle" id="room-detail-subtitle">Gestiona el inventario y consumo de la habitaci&oacute;n.</p>
@@ -216,7 +211,7 @@
         <!-- Tabs Navigation -->
         <div class="room-tabs" id="room-tabs">
           <button class="room-tab active" data-tab="inventory">
-            <i class="ph-light ph-fridge"></i>
+            <i class="ph-light ph-wine"></i>
             <span data-i18n="minibarTabInventory">Inventario</span>
           </button>
           <button class="room-tab" data-tab="consumption">
@@ -234,10 +229,6 @@
           <button class="room-tab" data-tab="history">
             <i class="ph-light ph-clock-counter-clockwise"></i>
             <span data-i18n="minibarTabHistory">Historial</span>
-          </button>
-          <button class="room-tab" data-tab="reports">
-            <i class="ph-light ph-chart-bar"></i>
-            <span data-i18n="minibarTabReports">Reportes</span>
           </button>
         </div>
 
@@ -322,34 +313,6 @@
           <div id="history-container">
             <!-- populated by JS -->
           </div>
-        </div>
-
-        <!-- Tab Content: Reports -->
-        <div class="tab-content" id="tab-reports">
-          <div class="report-filters">
-            <div class="report-filter-group">
-              <label class="report-label" data-i18n="minibarReportFrom">Desde</label>
-              <input type="date" class="report-input" id="report-from" />
-            </div>
-            <div class="report-filter-group">
-              <label class="report-label" data-i18n="minibarReportTo">Hasta</label>
-              <input type="date" class="report-input" id="report-to" />
-            </div>
-            <div class="report-filter-actions">
-              <button class="btn-primary btn-sm" type="button" id="generate-report-btn">
-                <i class="ph-light ph-magnifying-glass"></i>
-                <span data-i18n="minibarReportGenerate">Generar reporte</span>
-              </button>
-              <button class="btn-secondary btn-sm" type="button" id="download-report-pdf-btn">
-                <i class="ph-light ph-file-pdf"></i>
-                <span data-i18n="minibarReportPDF">Exportar PDF</span>
-              </button>
-            </div>
-          </div>
-          <div id="report-result">
-            <!-- populated by JS -->
-          </div>
-          <div id="report-status" class="status"></div>
         </div>
 
       </section>

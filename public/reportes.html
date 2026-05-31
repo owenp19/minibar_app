@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reportes – ChargeIt Hotel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/images/mujer_isle%C3%B1a.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-top">
+        <div class="sidebar-logo-block">
+          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" aria-hidden="true">
+            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
+            <span id="user-initials"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Operador</div>
+            <div class="sidebar-user-role">Nattivo Collection Hotel</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/app/dashboard" class="nav-item">
+            <i class="ph-light ph-chart-pie nav-icon"></i>
+            <span class="nav-label">Dashboard</span>
+          </a>
+          <a href="/app/minibar" class="nav-item">
+            <i class="ph-light ph-wine nav-icon"></i>
+            <span class="nav-label">Minibares</span>
+          </a>
+          <a href="/app/admin" class="nav-item">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label">Admin</span>
+          </a>
+          <a href="/unlock.html" class="nav-item">
+            <i class="ph-light ph-key nav-icon"></i>
+            <span class="nav-label">Desbloqueo</span>
+          </a>
+          <a href="/app/perdidas" class="nav-item">
+            <i class="ph-light ph-chart-bar nav-icon"></i>
+            <span class="nav-label">Pérdidas</span>
+          </a>
+          <a href="/app/reportes" class="nav-item nav-item-active" aria-current="page">
+            <i class="ph-light ph-file-text nav-icon"></i>
+            <span class="nav-label">Reportes</span>
+          </a>
+          <a href="/app/auditoria" class="nav-item">
+            <i class="ph-light ph-clipboard-text nav-icon"></i>
+            <span class="nav-label">Auditoría</span>
+          </a>
+          <a href="/perfil" class="nav-item">
+            <i class="ph-light ph-user nav-icon"></i>
+            <span class="nav-label">Perfil</span>
+          </a>
+          <a href="/settings" class="nav-item">
+            <i class="ph-light ph-gear nav-icon"></i>
+            <span class="nav-label">Configuración</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-credit">
+          <span>v1.0.1</span><br>
+          <span>Desarrollado por Owen Pusey — Minibar Hotel Nattivo</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <form action="/api/auth/logout" method="POST" class="sidebar-nav">
+          <button type="submit" class="nav-item nav-item-danger">
+            <i class="ph-light ph-sign-out nav-icon"></i>
+            <span class="nav-label">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="ph-light ph-list"></i>
+        </button>
+
+        <div class="main-header-title">
+          <div id="breadcrumb">
+            <span class="crumb">
+              <i class="ph-light ph-house"></i>
+              <span class="crumb-current">Reportes</span>
+            </span>
+          </div>
+
+          <h1>
+            <i class="ph-light ph-file-text" style="margin-right:8px;"></i>
+            <span>Reportes</span>
+          </h1>
+
+          <p id="page-description">Genera informes de consumo minibar y pérdidas por rango de fechas.</p>
+        </div>
+
+        <div class="header-controls">
+          <div class="theme-toggle-group" id="app-theme-switcher">
+            <button class="theme-toggle-btn active" data-theme-mode="light" aria-label="Modo claro" title="Modo claro">
+              <i class="ph-light ph-sun"></i>
+            </button>
+            <button class="theme-toggle-btn" data-theme-mode="dark" aria-label="Modo oscuro" title="Modo oscuro">
+              <i class="ph-light ph-moon"></i>
+            </button>
+          </div>
+          <div class="header-lang-group" id="app-lang-selector">
+            <button class="header-lang-btn active" data-lang="es">ES</button>
+            <button class="header-lang-btn" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Filters -->
+      <section class="card" style="margin-bottom:16px;">
+        <div class="report-filters">
+          <div class="report-filter-group">
+            <label>Fecha inicial</label>
+            <input type="date" class="admin-input" id="report-from" />
+          </div>
+          <div class="report-filter-group">
+            <label>Fecha final</label>
+            <input type="date" class="admin-input" id="report-to" />
+          </div>
+          <div class="report-filter-actions">
+            <button class="btn-primary btn-sm" id="generate-all-btn">
+              <i class="ph-light ph-magnifying-glass"></i>
+              <span>Generar reportes</span>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border);">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:500;">
+            <input type="radio" name="report-type" value="both" checked />
+            <span>Ambos</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:500;">
+            <input type="radio" name="report-type" value="consumos" />
+            <span>Consumo minibar</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:500;">
+            <input type="radio" name="report-type" value="perdidas" />
+            <span>Pérdidas</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Results: Consumos -->
+      <section class="card" id="report-consumos-section" style="display:none; margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2 class="card-title">
+              <i class="ph-light ph-wine" style="margin-right:8px;"></i>
+              <span>Consumo minibar</span>
+            </h2>
+            <p class="card-subtitle" id="report-consumos-subtitle">Reporte de consumos</p>
+          </div>
+          <div class="card-head-actions">
+            <button class="btn-secondary btn-sm" id="export-consumos-pdf-btn">
+              <i class="ph-light ph-file-pdf"></i>
+              <span>PDF</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="export-consumos-excel-btn">
+              <i class="ph-light ph-file"></i>
+              <span>Excel</span>
+            </button>
+          </div>
+        </div>
+        <div id="report-consumos-content">
+          <div class="empty-state">
+            <i class="ph-light ph-file-text"></i>
+            <h3>Sin datos</h3>
+            <p>Selecciona un rango de fechas y genera los reportes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results: Pérdidas -->
+      <section class="card" id="report-perdidas-section" style="display:none; margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2 class="card-title">
+              <i class="ph-light ph-chart-bar" style="margin-right:8px;"></i>
+              <span>Pérdidas</span>
+            </h2>
+            <p class="card-subtitle" id="report-perdidas-subtitle">Reporte de productos robados o dañados</p>
+          </div>
+          <div class="card-head-actions">
+            <button class="btn-secondary btn-sm" id="export-perdidas-pdf-btn">
+              <i class="ph-light ph-file-pdf"></i>
+              <span>PDF</span>
+            </button>
+            <button class="btn-secondary btn-sm" id="export-perdidas-excel-btn">
+              <i class="ph-light ph-file"></i>
+              <span>Excel</span>
+            </button>
+          </div>
+        </div>
+        <div id="report-perdidas-content">
+          <div class="empty-state">
+            <i class="ph-light ph-file-text"></i>
+            <h3>Sin datos</h3>
+            <p>Selecciona un rango de fechas y genera los reportes.</p>
+          </div>
+        </div>
+      </section>
+
+      <div id="report-status" class="status" style="margin-top:8px;"></div>
+
+    </main>
+  </div>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/reportes.js"></script>
+</body>
+</html>

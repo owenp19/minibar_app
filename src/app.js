@@ -13,6 +13,10 @@ const consumptionRoutes = require("./routes/consumptionRoutes");
 const authRoutes = require("./routes/authRoutes");
 const minibarRoutes = require("./routes/minibarRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const perdidasRoutes = require("./routes/perdidasRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const auditRoutes = require("./routes/auditRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 function createApp() {
   initDbPool();
@@ -392,11 +396,11 @@ function createApp() {
   });
 
   app.get("/app", requireLogin, (req, res) => {
-    res.redirect("/app/minibar");
+    res.redirect("/app/dashboard");
   });
 
   app.get("/app/ChargeIt", requireLogin, (req, res) => {
-    res.redirect("/app/minibar");
+    res.redirect("/app/dashboard");
   });
 
   app.get("/perfil", requireLogin, (req, res) => {
@@ -425,9 +429,33 @@ function createApp() {
   app.use("/api/consumptions", requireLogin, consumptionRoutes);
   app.use("/api/minibar", requireLogin, minibarRoutes);
   app.use("/api/admin", requireAdmin, adminRoutes);
+  app.use("/api/perdidas", requireLogin, perdidasRoutes);
+  app.use("/api/notifications", requireLogin, notificationRoutes);
+  app.use("/api/audit", requireLogin, auditRoutes);
+  app.use("/api/dashboard", requireLogin, dashboardRoutes);
+
+  app.get("/app/dashboard", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"));
+  });
+
+  app.get("/app/auditoria", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "auditoria.html"));
+  });
+
+  app.get("/app/notificaciones", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "notificaciones.html"));
+  });
 
   app.get("/app/admin", requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, "..", "public", "admin.html"));
+  });
+
+  app.get("/app/perdidas", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "perdidas.html"));
+  });
+
+  app.get("/app/reportes", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "reportes.html"));
   });
 
   app.use(notFoundHandler);
