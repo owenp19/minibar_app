@@ -90,9 +90,26 @@
 
   /* Layout */
   --container-max: 1220px;
+  --sidebar-width: 260px;
+  --sidebar-width-mobile: 300px;
+
+  /* Touch targets (mobile) */
+  --touch-min-height: 48px;
+  --touch-min-width: 48px;
+
+  /* Bottom bar */
+  --bottom-bar-height: 64px;
+
+  /* Z-index layers */
+  --z-sidebar: 60;
+  --z-backdrop: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+  --z-preloader: 9999;
 
   /* Login */
   --login-overlay: rgba(77, 85, 61, 0.85);
+  --shadow-bottom-bar: 0 -4px 20px rgba(0, 0, 0, 0.10);
 }
 
 [data-theme="dark"] {
@@ -152,4 +169,5 @@
   --input-border: rgba(255, 255, 255, 0.10);
 
   --login-overlay: rgba(17, 20, 14, 0.92);
+  --shadow-bottom-bar: 0 -4px 20px rgba(0, 0, 0, 0.30);
 }

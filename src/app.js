@@ -446,6 +446,10 @@ function createApp() {
     res.sendFile(path.join(__dirname, "..", "public", "notificaciones.html"));
   });
 
+  app.get("/app/revision-rapida", requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "revision-rapida.html"));
+  });
+
   app.get("/app/admin", requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, "..", "public", "admin.html"));
   });

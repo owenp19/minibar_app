@@ -2,7 +2,7 @@
 <html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
   <title>Reportes – ChargeIt Hotel</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +47,10 @@
           <a href="/app/minibar" class="nav-item">
             <i class="ph-light ph-wine nav-icon"></i>
             <span class="nav-label">Minibares</span>
+          </a>
+          <a href="/app/revision-rapida" class="nav-item">
+            <i class="ph-light ph-lightning nav-icon"></i>
+            <span class="nav-label">Revisión rápida</span>
           </a>
           <a href="/app/admin" class="nav-item">
             <i class="ph-light ph-shield-check nav-icon"></i>
@@ -231,8 +235,44 @@
     </main>
   </div>
 
+  <!-- Navigation Preloader -->
+  <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
+    <div class="nav-preloader-content">
+      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <div class="nav-preloader-bar">
+        <div class="nav-preloader-fill"></div>
+      </div>
+      <span class="nav-preloader-text" data-i18n="preloaderText">Cargando experiencia…</span>
+    </div>
+  </div>
+
   <script src="/js/theme.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/reportes.js"></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem("chargeit-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      var lang = localStorage.getItem("chargeit-lang") || "es";
+      document.documentElement.setAttribute("lang", lang);
+
+      // Navigation preloader
+      document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {
+        link.addEventListener("click", function(e) {
+          var href = link.getAttribute("href");
+          if (!href || href === "#" || href.startsWith("http") || href.startsWith("//") || href.startsWith("/api")) return;
+          e.preventDefault();
+          var preloader = document.getElementById("nav-preloader");
+          if (preloader) {
+            preloader.classList.remove("hidden");
+            preloader.classList.add("visible");
+          }
+          setTimeout(function() {
+            window.location.href = href;
+          }, 400);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

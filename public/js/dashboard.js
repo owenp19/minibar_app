@@ -69,16 +69,33 @@
     return map[type] || "ph-chart-bar";
   };
 
+  var t = function (key, fallback) {
+    return (window.translations && translations[getCurrentLang ? getCurrentLang() : "es"] && translations[getCurrentLang ? getCurrentLang() : "es"][key]) || fallback || key;
+  };
+
   var kpiLabel = function (type) {
     var map = {
-      "today_amount": "Consumo hoy", "period_amount": "Consumo del per\u00edodo", "today_products": "Productos consumidos hoy",
-      "today_loss_amount": "P\u00e9rdidas hoy", "stolen_total": "Productos robados", "damaged_total": "Productos da\u00f1ados",
-      "rooms_with_consumption": "Habitaciones con consumo", "rooms_pending": "Habitaciones pendientes", "agotados_products": "Productos agotados",
-      "low_stock_rooms": "Habitaciones stock bajo", "top_floor": "Piso mayor consumo", "top_room": "Habitaci\u00f3n mayor consumo",
-      "today_movements": "Movimientos hoy", "period_movements": "Movimientos per\u00edodo", "period_loss_amount": "P\u00e9rdidas per\u00edodo",
-      "period_loss_records": "Registros p\u00e9rdida", "stolen_amount": "Valor robado", "damaged_amount": "Valor da\u00f1ado",
-      "total_rooms": "Total habitaciones", "agotados_rooms": "Habitaciones con agotados", "today_loss_records": "Registros p\u00e9rdida hoy",
-      "today_products": "Productos hoy",
+      "today_amount": t("dashboardToday", "Hoy"),
+      "period_amount": t("dashboardPeriodAmount", "Consumo del per\u00edodo"),
+      "today_products": t("dashboardProductsToday", "Productos hoy"),
+      "today_loss_amount": t("dashboardLossToday", "P\u00e9rdidas hoy"),
+      "stolen_total": t("dashboardStolenTotal", "Productos robados"),
+      "damaged_total": t("dashboardDamagedTotal", "Productos da\u00f1ados"),
+      "rooms_with_consumption": t("dashboardRoomsWithConsumption", "Habitaciones con consumo"),
+      "rooms_pending": t("dashboardPendingRooms", "Habitaciones pendientes"),
+      "agotados_products": t("dashboardOutOfStock", "Productos agotados"),
+      "low_stock_rooms": t("dashboardLowStockRooms", "Habitaciones stock bajo"),
+      "top_floor": t("dashboardTopFloor", "Piso mayor consumo"),
+      "top_room": t("dashboardTopRoom", "Habitaci\u00f3n mayor consumo"),
+      "today_movements": t("dashboardMovementsToday", "Movimientos hoy"),
+      "period_movements": t("dashboardPeriodMovements", "Movimientos per\u00edodo"),
+      "period_loss_amount": t("dashboardLossPeriod", "P\u00e9rdidas per\u00edodo"),
+      "period_loss_records": t("dashboardLossRecords", "Registros p\u00e9rdida"),
+      "stolen_amount": t("dashboardStolenAmount", "Valor robado"),
+      "damaged_amount": t("dashboardDamagedAmount", "Valor da\u00f1ado"),
+      "total_rooms": t("dashboardTotalRooms", "Total habitaciones"),
+      "agotados_rooms": t("dashboardOutOfStockRooms", "Habitaciones con agotados"),
+      "today_loss_records": t("dashboardLossRecordsToday", "Registros p\u00e9rdida hoy"),
     };
     return map[type] || type;
   };
@@ -87,15 +104,16 @@
     var container = document.getElementById("dash-kpis");
     if (!container) return;
 
+    var lang = getCurrentLang ? getCurrentLang() : "es";
     var items = [
-      { key: "today_amount", val: formatCOP(kpis.today_amount), sub: (kpis.today_movements || 0) + " movimientos" },
-      { key: "period_amount", val: formatCOP(kpis.period_amount), sub: kpis.variance_pct != null ? ((kpis.variance_pct >= 0 ? "+" : "") + kpis.variance_pct + "% vs per\u00edodo anterior") : "" },
-      { key: "today_products", val: formatNum(kpis.today_products), sub: "consumidos hoy" },
-      { key: "rooms_with_consumption", val: formatNum(kpis.rooms_with_consumption), sub: "de " + formatNum(kpis.total_rooms) + " habitaciones" },
-      { key: "rooms_pending", val: formatNum(kpis.rooms_pending), sub: "pendientes de revisi\u00f3n" },
-      { key: "agotados_products", val: formatNum(kpis.agotados_products), sub: "en " + formatNum(kpis.agotados_rooms) + " habitaciones" },
-      { key: "low_stock_rooms", val: formatNum(kpis.low_stock_rooms), sub: "con inventario bajo" },
-      { key: "top_floor", val: kpis.top_floor || "—", sub: "mayor consumo del per\u00edodo" },
+      { key: "today_amount", val: formatCOP(kpis.today_amount), sub: (kpis.today_movements || 0) + " " + (translations && translations[lang] && translations[lang].dashboardMovements ? translations[lang].dashboardMovements : "movements") },
+      { key: "period_amount", val: formatCOP(kpis.period_amount), sub: kpis.variance_pct != null ? ((kpis.variance_pct >= 0 ? "+" : "") + kpis.variance_pct + "% " + (translations && translations[lang] && translations[lang].dashboardVsPrev ? translations[lang].dashboardVsPrev : "vs previous period")) : "" },
+      { key: "today_products", val: formatNum(kpis.today_products), sub: translations && translations[lang] && translations[lang].dashboardConsumedToday ? translations[lang].dashboardConsumedToday : "consumed today" },
+      { key: "rooms_with_consumption", val: formatNum(kpis.rooms_with_consumption), sub: (translations && translations[lang] && translations[lang].dashboardOf ? translations[lang].dashboardOf : "of") + " " + formatNum(kpis.total_rooms) + " " + (translations && translations[lang] && translations[lang].dashboardRooms ? translations[lang].dashboardRooms : "rooms") },
+      { key: "rooms_pending", val: formatNum(kpis.rooms_pending), sub: translations && translations[lang] && translations[lang].dashboardPendingReview ? translations[lang].dashboardPendingReview : "pending review" },
+      { key: "agotados_products", val: formatNum(kpis.agotados_products), sub: (translations && translations[lang] && translations[lang].dashboardIn ? translations[lang].dashboardIn : "in") + " " + formatNum(kpis.agotados_rooms) + " " + (translations && translations[lang] && translations[lang].dashboardRooms ? translations[lang].dashboardRooms : "rooms") },
+      { key: "low_stock_rooms", val: formatNum(kpis.low_stock_rooms), sub: translations && translations[lang] && translations[lang].dashboardLowInventory ? translations[lang].dashboardLowInventory : "with low inventory" },
+      { key: "top_floor", val: kpis.top_floor || "—", sub: translations && translations[lang] && translations[lang].dashboardHighestConsumption ? translations[lang].dashboardHighestConsumption : "highest period consumption" },
     ];
 
     if (kpis.stolen_total > 0 || kpis.damaged_total > 0) {
@@ -282,7 +300,7 @@
     if (!container) return;
 
     if (!alerts || alerts.length === 0) {
-      container.innerHTML = '<div class="dash-empty"><i class="ph-light ph-check-circle"></i><p>No hay alertas activas.</p></div>';
+      container.innerHTML = '<div class="dash-empty"><i class="ph-light ph-check-circle"></i><p>' + t("dashboardNoAlerts", "No hay alertas activas.") + '</p></div>';
       return;
     }
 
@@ -299,11 +317,17 @@
     if (!container) return;
 
     if (!movements || movements.length === 0) {
-      container.innerHTML = '<div class="dash-empty"><i class="ph-light ph-clock"></i><p>No hay movimientos recientes.</p></div>';
+      container.innerHTML = '<div class="dash-empty"><i class="ph-light ph-clock"></i><p>' + t("dashboardNoRecentMovements", "No hay movimientos recientes.") + '</p></div>';
       return;
     }
 
-    var typeLabels = { consumption: "Consumo", restock: "Reposici\u00f3n", perdida: "P\u00e9rdida", dano: "Da\u00f1o", adjustment: "Ajuste" };
+    var typeLabels = {
+      consumption: t("movementConsumption", "Consumo"),
+      restock: t("movementRestock", "Reposición"),
+      perdida: t("movementLoss", "Pérdida"),
+      dano: t("movementDamage", "Daño"),
+      adjustment: t("movementAdjustment", "Ajuste")
+    };
     var typeIcons = { consumption: "ph-shopping-cart", restock: "ph-plus-circle", perdida: "ph-warning", dano: "ph-warning-circle", adjustment: "ph-arrows-clockwise" };
 
     container.innerHTML = movements.map(function (m) {
@@ -314,7 +338,7 @@
         var d = new Date(m.created_at);
         var now = new Date();
         var diff = Math.round((now - d) / 60000);
-        if (diff < 1) time = "Ahora";
+        if (diff < 1) time = t("now", "Ahora");
         else if (diff < 60) time = diff + " min";
         else if (diff < 1440) time = Math.round(diff / 60) + "h";
         else time = d.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
@@ -322,7 +346,7 @@
       return '<div class="dash-recent-item">' +
         '<div class="type-icon ' + m.movement_type + '"><i class="ph-light ' + icon + '"></i></div>' +
         '<div class="dash-recent-info">' +
-          '<strong>' + label + '</strong> — ' + m.product_name + ' <span class="dash-recent-time">en ' + m.room_number + ' (' + m.floor_name + ')</span>' +
+          '<strong>' + label + '</strong> — ' + m.product_name + ' <span class="dash-recent-time">' + t("dashboardIn", "en") + ' ' + m.room_number + ' (' + m.floor_name + ')</span>' +
         '</div>' +
         '<div class="dash-recent-time">' + time + '</div>' +
       '</div>';

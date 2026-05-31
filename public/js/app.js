@@ -32,6 +32,198 @@ function sanitizePhone(phone) {
   return s.replace(/[^\d]/g, "");
 }
 
+/* ---------- Toast Notification System ---------- */
+function showToast(message, type) {
+  type = type || "info";
+  var container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  var toast = document.createElement("div");
+  toast.className = "toast " + type;
+
+  var icons = {
+    success: "ph-check-circle",
+    error: "ph-warning-circle",
+    warning: "ph-warning",
+    info: "ph-info"
+  };
+  var iconClass = icons[type] || icons.info;
+
+  toast.innerHTML =
+    '<i class="ph-light ' + iconClass + '"></i>' +
+    '<span class="toast-text">' + message + '</span>' +
+    '<button class="toast-close" onclick="this.parentElement.classList.add(\'removing\');setTimeout(function(){this.parentElement.remove()}.bind(this),250)" aria-label="Cerrar"><i class="ph-light ph-x"></i></button>';
+
+  container.appendChild(toast);
+
+  setTimeout(function () {
+    if (toast.parentElement) {
+      toast.classList.add("removing");
+      setTimeout(function () {
+        if (toast.parentElement) toast.remove();
+      }, 250);
+    }
+  }, 4000);
+}
+
+/* ---------- Confirmation Dialog ---------- */
+function showConfirm(_ref) {
+  var title = _ref.title,
+    message = _ref.message,
+    confirmText = _ref.confirmText,
+    cancelText = _ref.cancelText,
+    icon = _ref.icon,
+    iconType = _ref.iconType,
+    onConfirm = _ref.onConfirm,
+    onCancel = _ref.onCancel;
+
+  var existing = document.querySelector(".confirm-overlay");
+  if (existing) existing.remove();
+
+  var overlay = document.createElement("div");
+  overlay.className = "confirm-overlay visible";
+
+  var iconHtml = "";
+  if (icon) {
+    var iType = iconType || "info";
+    iconHtml = '<i class="ph-light ' + icon + ' confirm-icon-' + iType + '"></i>';
+  }
+
+  overlay.innerHTML =
+    '<div class="confirm-dialog">' +
+    (iconHtml ? '<div class="confirm-header">' + iconHtml + '<h3>' + (title || "Confirmar") + '</h3></div>' : '<div class="confirm-header"><h3>' + (title || "Confirmar") + '</h3></div>') +
+    '<div class="confirm-body">' + (message || "") + '</div>' +
+    '<div class="confirm-actions">' +
+    '<button class="btn-secondary" id="confirm-cancel-btn">' + (cancelText || "Cancelar") + '</button>' +
+    '<button class="btn-primary" id="confirm-ok-btn">' + (confirmText || "Confirmar") + '</button>' +
+    "</div>" +
+    "</div>";
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("confirm-cancel-btn").addEventListener("click", function () {
+    overlay.remove();
+    if (onCancel) onCancel();
+  });
+
+  document.getElementById("confirm-ok-btn").addEventListener("click", function () {
+    overlay.remove();
+    if (onConfirm) onConfirm();
+  });
+
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) {
+      overlay.remove();
+      if (onCancel) onCancel();
+    }
+  });
+}
+
+/* ---------- Mobile Utilities ---------- */
+function isMobile() {
+  return window.innerWidth <= 680;
+}
+
+function isTablet() {
+  return window.innerWidth > 680 && window.innerWidth <= 960;
+}
+
+function isTouchDevice() {
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
+function debounce(fn, delay) {
+  var timer = null;
+  return function () {
+    var context = this;
+    var args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fn.apply(context, args);
+    }, delay);
+  };
+}
+
+/* ---------- Mobile bottom bar management ---------- */
+function setupBottomBar() {
+  var hasBottomBar = document.querySelector(".bottom-bar.show");
+  if (hasBottomBar && isMobile()) {
+    document.body.classList.add("has-bottom-bar");
+  }
+}
+
+/* ---------- Room quick search ---------- */
+function setupQuickRoomSearch(inputId, resultId, onFound) {
+  var input = document.getElementById(inputId);
+  var result = document.getElementById(resultId);
+  if (!input || !result) return;
+
+  var cache = null;
+  var cacheLoaded = false;
+
+  async function loadRoomsForSearch() {
+    if (cacheLoaded && cache) return cache;
+    try {
+      var res = await fetch("/api/rooms", { credentials: "include" });
+      if (!res.ok) throw new Error("Error");
+      var rooms = await res.json();
+      cache = Array.isArray(rooms) ? rooms : [];
+      cacheLoaded = true;
+      return cache;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  var debouncedSearch = debounce(async function () {
+    var q = input.value.trim();
+    if (!q) {
+      result.classList.remove("show", "not-found");
+      return;
+    }
+
+    var rooms = await loadRoomsForSearch();
+    var found = rooms.find(function (r) {
+      var num = String(
+        r.room_number || r.roomNumber || r.numero_habitacion || r.numero || r.number || r.code || ""
+      );
+      return num === q;
+    });
+
+    if (found) {
+      result.classList.remove("not-found");
+      result.classList.add("show");
+      var num = found.room_number || found.roomNumber || found.numero_habitacion || found.numero || found.number || found.code || q;
+      result.innerHTML =
+        '<div class="quick-search-result-text"><i class="ph-light ph-bed"></i> Habitaci\u00f3n ' + num + ' <span class="room-status-badge pendiente">Seleccionar</span></div>';
+      result.onclick = function () {
+        if (onFound) onFound(found);
+      };
+    } else {
+      result.classList.add("show", "not-found");
+      result.innerHTML =
+        '<div class="quick-search-result-text"><i class="ph-light ph-warning-circle"></i> No se encontr\u00f3 la habitaci\u00f3n ingresada.</div>';
+      result.onclick = null;
+    }
+  }, 300);
+
+  input.addEventListener("input", debouncedSearch);
+  input.addEventListener("focus", function () {
+    if (input.value.trim()) debouncedSearch();
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!input.contains(e.target) && !result.contains(e.target)) {
+      result.classList.remove("show");
+    }
+  });
+}
+
 /* ---------- User ---------- */
 function getInitialsFromName(fullName) {
   if (!fullName) return "";
@@ -964,7 +1156,7 @@ function buildPreviewMessageOnly() {
   return buildWhatsappMessage(roomNumber, items, total, note, "");
 }
 
-/* ---------- Menu toggle ---------- */
+/* ---------- Menu toggle (enhanced for mobile) ---------- */
 function setupMenuToggle() {
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = $("menu-toggle");
@@ -974,11 +1166,24 @@ function setupMenuToggle() {
   const open = () => {
     sidebar.classList.add("sidebar-open");
     if (backdrop) backdrop.classList.add("backdrop-visible");
+    document.body.style.overflow = "hidden";
   };
   const close = () => {
     sidebar.classList.remove("sidebar-open");
     if (backdrop) backdrop.classList.remove("backdrop-visible");
+    document.body.style.overflow = "";
   };
+
+  // Add close button to sidebar if not present
+  if (!sidebar.querySelector(".sidebar-close-btn")) {
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "sidebar-close-btn";
+    closeBtn.setAttribute("aria-label", "Cerrar men\u00fa");
+    closeBtn.innerHTML = '<i class="ph-light ph-x"></i>';
+    sidebar.appendChild(closeBtn);
+
+    closeBtn.addEventListener("click", close);
+  }
 
   toggleBtn.addEventListener("click", () => {
     if (sidebar.classList.contains("sidebar-open")) close();
@@ -986,6 +1191,42 @@ function setupMenuToggle() {
   });
 
   if (backdrop) backdrop.addEventListener("click", close);
+
+  // Close sidebar on escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sidebar.classList.contains("sidebar-open")) {
+      close();
+    }
+  });
+
+  // Swipe to close (mobile)
+  let touchStartX = 0;
+  let touchCurrentX = 0;
+  let isDragging = false;
+
+  sidebar.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    isDragging = sidebar.classList.contains("sidebar-open");
+  }, { passive: true });
+
+  sidebar.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    touchCurrentX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchCurrentX;
+    if (diff > 0) {
+      sidebar.style.transform = "translateX(" + (-diff) + "px)";
+      if (backdrop) backdrop.style.opacity = Math.max(0, 1 - diff / 300);
+    }
+  }, { passive: true });
+
+  sidebar.addEventListener("touchend", () => {
+    if (!isDragging) return;
+    const diff = touchStartX - touchCurrentX;
+    sidebar.style.transform = "";
+    if (backdrop) backdrop.style.opacity = "";
+    if (diff > 80) close();
+    isDragging = false;
+  }, { passive: true });
 }
 
 /* ---------- Clear ---------- */
@@ -1381,6 +1622,29 @@ function injectNotificationsNav() {
   }
 }
 
+/* ---------- Quick Review Nav Injection ---------- */
+function injectQuickReviewNav() {
+  var nav = document.querySelector(".sidebar-nav");
+  if (!nav) return;
+
+  var existingLink = document.getElementById("nav-quick-review");
+  var existingByHref = nav.querySelector('a[href="/app/revision-rapida"]');
+  if (existingLink || existingByHref) return;
+
+  var minibarLink = nav.querySelector('a[href="/app/minibar"]');
+  if (!minibarLink) return;
+
+  var quickLink = document.createElement("a");
+  quickLink.href = "/app/revision-rapida";
+  quickLink.className = "nav-item";
+  quickLink.id = "nav-quick-review";
+  quickLink.innerHTML =
+    '<i class="ph-light ph-lightning nav-icon"></i>' +
+    '<span class="nav-label">Revisión rápida</span>';
+
+  minibarLink.parentNode.insertBefore(quickLink, minibarLink.nextSibling);
+}
+
 /* =========================
    Init
    ========================= */
@@ -1393,6 +1657,10 @@ async function init() {
 
   loadCurrentUser();
   injectNotificationsNav();
+  injectQuickReviewNav();
+
+  // Mobile bottom bar
+  setupBottomBar();
 
   // Consumo: solo si existen los elementos
   if ($("room-select")) await loadRooms({ clear: true });
@@ -1413,6 +1681,20 @@ async function init() {
   if ($("rooms-multi")) setUnlockPreview(buildUnlockPreviewMessageOnly());
 
   updateKpis();
+
+  // Quick room search setup
+  if ($("quick-room-search")) {
+    setupQuickRoomSearch("quick-room-search", "quick-room-result", function (room) {
+      var roomId = room.id || room.room_id || room.roomId;
+      var roomNum = room.room_number || room.roomNumber || room.numero_habitacion || room.numero || room.number || "";
+      window.location.href = "/app/minibar?room=" + roomId + "&floor=" + (room.floor_id || room.piso_id || "");
+    });
+  }
+
+  // Mark touch device for CSS
+  if (isTouchDevice()) {
+    document.documentElement.classList.add("touch-device");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

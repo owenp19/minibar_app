@@ -2,7 +2,7 @@
 <html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
   <title>Dashboard – ChargeIt Nattivo Collection</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,19 +162,23 @@
         <nav class="sidebar-nav">
           <a href="/app/dashboard" class="nav-item nav-item-active" aria-current="page">
             <i class="ph-light ph-chart-pie nav-icon"></i>
-            <span class="nav-label">Dashboard</span>
+            <span class="nav-label" data-i18n="navDashboard">Dashboard</span>
           </a>
           <a href="/app/minibar" class="nav-item">
             <i class="ph-light ph-wine nav-icon"></i>
-            <span class="nav-label">Minibares</span>
+            <span class="nav-label" data-i18n="navMinibars">Minibares</span>
+          </a>
+          <a href="/app/revision-rapida" class="nav-item">
+            <i class="ph-light ph-lightning nav-icon"></i>
+            <span class="nav-label">Revisión rápida</span>
           </a>
           <a href="/app/admin" class="nav-item">
             <i class="ph-light ph-shield-check nav-icon"></i>
-            <span class="nav-label">Admin</span>
+            <span class="nav-label" data-i18n="navAdmin">Admin</span>
           </a>
           <a href="/unlock.html" class="nav-item">
             <i class="ph-light ph-key nav-icon"></i>
-            <span class="nav-label">Desbloqueo</span>
+            <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
           </a>
           <a href="/app/perdidas" class="nav-item">
             <i class="ph-light ph-chart-bar nav-icon"></i>
@@ -186,7 +190,7 @@
           </a>
           <a href="/app/auditoria" class="nav-item">
             <i class="ph-light ph-clipboard-text nav-icon"></i>
-            <span class="nav-label">Auditoría</span>
+            <span class="nav-label" data-i18n="navAudit">Auditoría</span>
           </a>
           <a href="/app/notificaciones" class="nav-item" id="nav-notifications">
             <i class="ph-light ph-bell nav-icon"></i>
@@ -195,11 +199,11 @@
           </a>
           <a href="/perfil" class="nav-item">
             <i class="ph-light ph-user nav-icon"></i>
-            <span class="nav-label">Perfil</span>
+            <span class="nav-label" data-i18n="navProfile">Perfil</span>
           </a>
           <a href="/settings" class="nav-item">
             <i class="ph-light ph-gear nav-icon"></i>
-            <span class="nav-label">Configuración</span>
+            <span class="nav-label" data-i18n="navSettings">Configuración</span>
           </a>
         </nav>
         <div class="sidebar-credit">
@@ -211,7 +215,7 @@
         <form action="/api/auth/logout" method="POST" class="sidebar-nav">
           <button type="submit" class="nav-item nav-item-danger">
             <i class="ph-light ph-sign-out nav-icon"></i>
-            <span class="nav-label">Cerrar sesión</span>
+            <span class="nav-label" data-i18n="navLogout">Cerrar sesión</span>
           </button>
         </form>
       </div>
@@ -226,12 +230,12 @@
           <div class="breadcrumb">
             <span class="crumb">
               <i class="ph-light ph-house"></i>
-              <span class="crumb-current">Dashboard</span>
+              <span class="crumb-current" data-i18n="navDashboard">Dashboard</span>
             </span>
           </div>
           <div class="dash-header">
-            <h1>Panel de control</h1>
-            <p>Resumen operativo de minibares — Nattivo Collection Hotel</p>
+            <h1 data-i18n="dashboardTitle">Panel de control</h1>
+            <p data-i18n="dashboardDesc">Resumen operativo de minibares — Nattivo Collection Hotel</p>
           </div>
         </div>
         <div class="header-controls">
@@ -252,35 +256,35 @@
 
       <div id="dash-content">
         <div class="dash-filters" id="dash-filters">
-          <button class="dash-filter-btn" data-filter="today"><i class="ph-light ph-calendar-blank"></i> Hoy</button>
-          <button class="dash-filter-btn" data-filter="week"><i class="ph-light ph-calendar-week"></i> Esta semana</button>
-          <button class="dash-filter-btn active" data-filter="month"><i class="ph-light ph-calendar"></i> Este mes</button>
+          <button class="dash-filter-btn" data-filter="today"><i class="ph-light ph-calendar-blank"></i> <span data-i18n="dashboardToday">Hoy</span></button>
+          <button class="dash-filter-btn" data-filter="week"><i class="ph-light ph-calendar-week"></i> <span data-i18n="dashboardWeek">Esta semana</span></button>
+          <button class="dash-filter-btn active" data-filter="month"><i class="ph-light ph-calendar"></i> <span data-i18n="dashboardThisMonth">Este mes</span></button>
         </div>
 
         <div id="dash-kpis" class="dash-kpi-grid"></div>
 
         <div class="dash-alerts" id="dash-alerts-section">
-          <h2><i class="ph-light ph-bell"></i> Alertas operativas</h2>
+          <h2><i class="ph-light ph-bell"></i> <span data-i18n="dashboardAlerts">Alertas operativas</span></h2>
           <div class="dash-alerts-list" id="dash-alerts-list"></div>
         </div>
 
         <div class="dash-charts-grid">
           <div class="dash-chart-card">
-            <h3><i class="ph-light ph-buildings"></i> Consumo por piso</h3>
+            <h3><i class="ph-light ph-buildings"></i> <span data-i18n="dashboardConsumptionByFloor">Consumo por piso</span></h3>
             <div class="dash-chart-wrapper"><canvas id="chart-floor"></canvas></div>
           </div>
           <div class="dash-chart-card">
-            <h3><i class="ph-light ph-cube"></i> Top productos consumidos</h3>
+            <h3><i class="ph-light ph-cube"></i> <span data-i18n="dashboardTopProducts">Top productos consumidos</span></h3>
             <div class="dash-chart-wrapper"><canvas id="chart-products"></canvas></div>
           </div>
           <div class="dash-chart-card">
-            <h3><i class="ph-light ph-bed"></i> Top habitaciones</h3>
+            <h3><i class="ph-light ph-bed"></i> <span data-i18n="dashboardTopRooms">Top habitaciones</span></h3>
             <div class="dash-chart-wrapper"><canvas id="chart-rooms"></canvas></div>
           </div>
         </div>
 
         <div class="dash-recent" id="dash-recent-section">
-          <h2><i class="ph-light ph-clock"></i> Movimientos recientes</h2>
+          <h2><i class="ph-light ph-clock"></i> <span data-i18n="dashboardRecentMovements">Movimientos recientes</span></h2>
           <div class="dash-recent-list" id="dash-recent-list"></div>
         </div>
       </div>
