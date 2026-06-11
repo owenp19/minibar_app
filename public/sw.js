@@ -1,4 +1,4 @@
-const CACHE = "chargeit-v2";
+const CACHE = "chargeit-v3";
 
 const SHELL = [
   "/",
@@ -9,10 +9,19 @@ const SHELL = [
   "/settings.html",
   "/perfil.html",
   "/revision-rapida.html",
+  "/admin.html",
+  "/dashboard.html",
+  "/auditoria.html",
+  "/notificaciones.html",
+  "/perdidas.html",
+  "/reportes.html",
   "/manifest.webmanifest",
+  "/favicon.ico",
   "/css/theme.css",
   "/css/app.css",
   "/css/login.css",
+  "/css/chatbot.css",
+  "/css/register.css",
   "/js/theme.js",
   "/js/i18n.js",
   "/js/app.js",
@@ -22,12 +31,12 @@ const SHELL = [
   "/js/perfil.js",
   "/js/revision-rapida.js",
   "/js/chatbot.js",
+  "/js/dashboard.js",
   "/icons/icon-192.svg",
   "/icons/icon-512.svg",
   "/images/Logo_Nattivo_v1.png",
   "/images/Logo_Nattivo_v2.png",
   "/images/mujer_isle%C3%B1a.png",
-  "/css/chatbot.css",
   "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/light/style.css"
 ];
 

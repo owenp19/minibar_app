@@ -3,7 +3,6 @@
    =================================================== */
 
 function getCurrentTheme() {
-  // Migrate from old key
   var oldTheme = localStorage.getItem("minibar-theme");
   if (oldTheme && !localStorage.getItem("chargeit-theme")) {
     localStorage.setItem("chargeit-theme", oldTheme);
@@ -65,4 +64,52 @@ function setupThemeSwitcher(container) {
   if (toggleBtn) {
     toggleBtn.addEventListener("click", toggleTheme);
   }
+}
+
+/* ── Auto-switch theme by time ── */
+function getAutoTheme() {
+  if (!localStorage.getItem("chargeit-autoswitch")) return null;
+  const hour = new Date().getHours();
+  return (hour >= 6 && hour < 19) ? "light" : "dark";
+}
+
+function applyAutoTheme() {
+  const auto = getAutoTheme();
+  if (auto) setTheme(auto);
+}
+
+function toggleAutoSwitch(enable) {
+  if (enable) {
+    localStorage.setItem("chargeit-autoswitch", "1");
+    applyAutoTheme();
+  } else {
+    localStorage.removeItem("chargeit-autoswitch");
+  }
+}
+
+function isAutoSwitchEnabled() {
+  return !!localStorage.getItem("chargeit-autoswitch");
+}
+
+// Run autoswitch every minute
+setInterval(applyAutoTheme, 60000);
+
+/* ── Font-size controls ── */
+function getFontSize() {
+  return localStorage.getItem("chargeit-font-size") || "medium";
+}
+
+function setFontSize(size) {
+  if (!["small", "medium", "large"].includes(size)) size = "medium";
+  localStorage.setItem("chargeit-font-size", size);
+  document.documentElement.setAttribute("data-font-size", size);
+
+  document.querySelectorAll(".font-size-option").forEach((opt) => {
+    opt.classList.toggle("active", opt.dataset.fontSize === size);
+  });
+}
+
+function initFontSize() {
+  const saved = getFontSize();
+  setFontSize(saved);
 }

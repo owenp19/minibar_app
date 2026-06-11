@@ -225,23 +225,77 @@
       rooms = await apiFetch('/api/minibar/rooms/' + floorId);
       renderRooms();
     } catch (err) {
-      el.roomsContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
+      var wrapper = el.roomsContainer.querySelector('.rooms-wrapper');
+      if (wrapper) wrapper.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
     }
   }
 
   function renderRooms() {
+    var wrapper = el.roomsContainer.querySelector('.rooms-wrapper');
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.className = 'rooms-wrapper';
+      el.roomsContainer.appendChild(wrapper);
+    }
+
     if (!rooms.length) {
-      el.roomsContainer.innerHTML = '<div class="empty-state"><i class="ph-light ph-bed"></i><h3>Sin habitaciones</h3><p>No hay habitaciones registradas en este piso.</p></div>';
+      wrapper.innerHTML = '<div class="empty-state-illustrated"><div class="empty-icon"><i class="ph-light ph-bed"></i></div><h3>Sin habitaciones</h3><p>No hay habitaciones registradas en este piso.</p></div>';
       return;
     }
-    el.roomsContainer.innerHTML = rooms.map((r) =>
-      '<div class="room-card' + (selectedRoomId === r.id ? ' active' : '') + '" data-room-id="' + r.id + '">' +
-        r.room_number +
-      '</div>'
-    ).join('');
 
-    el.roomsContainer.querySelectorAll('.room-card').forEach((card) => {
-      card.addEventListener('click', () => onRoomClick(Number(card.dataset.roomId)));
+    var viewMode = sessionStorage.getItem("minibar-room-view") || "list";
+
+    // Build view toggle
+    var toggleHtml =
+      '<div class="view-toggle" style="margin-bottom:12px;align-self:flex-start">' +
+        '<button class="view-toggle-btn' + (viewMode === "list" ? ' active' : '') + '" data-view="list"><i class="ph-light ph-list"></i> Lista</button>' +
+        '<button class="view-toggle-btn' + (viewMode === "map" ? ' active' : '') + '" data-view="map"><i class="ph-light ph-grid-four"></i> Mapa</button>' +
+      '</div>';
+
+    var roomsHtml = "";
+    var statusIcons = { ok: "ph-check-circle", pending: "ph-clock", alert: "ph-warning-circle", idle: "ph-bed" };
+    var statusLabels = { ok: "OK", pending: "Revisión", alert: "Atención", idle: "Inactiva" };
+
+    if (viewMode === "map") {
+      roomsHtml = '<div class="room-map" role="list">' + rooms.map(function (r) {
+        var s = r.status || "idle";
+        return '<div class="room-map-card status-' + s + '" data-room-id="' + r.id + '" role="button" tabindex="0" aria-label="Habitaci\u00f3n ' + r.room_number + ', estado ' + (statusLabels[s] || "") + '">' +
+          '<div class="room-map-icon"><i class="ph-light ' + (statusIcons[s] || "ph-bed") + '" aria-hidden="true"></i></div>' +
+          '<div class="room-map-number">' + r.room_number + '</div>' +
+          '<div class="room-map-status">' + (statusLabels[s] || "") + '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    } else {
+      roomsHtml = rooms.map(function (r) {
+        var s = r.status || "idle";
+        var borderStyle = s !== "idle" ? ' style="border-left:4px solid var(--color-' + (s === "ok" ? "success" : s === "pending" ? "warning" : "danger") + ')"' : "";
+        return '<div class="room-card' + (selectedRoomId === r.id ? ' active' : '') + '" data-room-id="' + r.id + '"' + borderStyle + '>' +
+          r.room_number +
+          '<span style="margin-left:auto;font-size:11px;opacity:0.6">' + (statusLabels[s] || "") + '</span>' +
+        '</div>';
+      }).join('');
+    }
+
+    wrapper.innerHTML = toggleHtml + roomsHtml;
+
+    // Toggle view buttons
+    el.roomsContainer.querySelectorAll('.view-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        sessionStorage.setItem("minibar-room-view", btn.dataset.view);
+        renderRooms();
+      });
+    });
+
+    // Room click & keyboard activation
+    function activateRoom(card) {
+      onRoomClick(Number(card.dataset.roomId));
+    }
+
+    el.roomsContainer.querySelectorAll('.room-map-card, .room-card').forEach(function (card) {
+      card.addEventListener('click', function () { activateRoom(card); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateRoom(card); }
+      });
     });
   }
 

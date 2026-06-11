@@ -43,21 +43,39 @@ async function seed() {
     await conn.query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL AFTER phone");
   } catch (e) { /* column may already exist */ }
 
-  const hash = await bcrypt.hash("admin123", 12);
+  const hash = await bcrypt.hash("minibar123", 12);
 
-  const [[{ count: userCount }]] = await conn.query("SELECT COUNT(*) AS count FROM users");
-  if (userCount === 0) {
+  // Verificar si el nuevo usuario ya existe
+  const [[{ cnt }]] = await conn.query(
+    "SELECT COUNT(*) AS cnt FROM users WHERE email = 'minibar@nattivo.app'"
+  );
+
+  if (cnt > 0) {
+    // Solo actualizar contraseña y nombre
     await conn.query(
-      "INSERT INTO users (full_name, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?)",
-      ["Owen Pusey", "operador@nattivo.com", hash, "admin", 1]
+      "UPDATE users SET password_hash = ?, role = 'admin', full_name = 'Minibar Operator' WHERE email = ?",
+      [hash, "minibar@nattivo.app"]
     );
-    console.log("  ✓ Usuario creado (admin)");
+    console.log("  ✓ Contraseña actualizada para minibar@nattivo.app");
   } else {
-    await conn.query(
-      "UPDATE users SET password_hash = ?, role = 'admin' WHERE email = ?",
-      [hash, "operador@nattivo.com"]
-    );
-    console.log("  ✓ Contraseña restablecida a: admin123 (rol actualizado a admin)");
+    // Buscar si hay algún usuario existente (ej: operador@nattivo.com)
+    const [[{ count }]] = await conn.query("SELECT COUNT(*) AS count FROM users");
+    if (count === 0) {
+      // Sin usuarios: crear nuevo
+      await conn.query(
+        "INSERT INTO users (full_name, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?)",
+        ["Minibar Operator", "minibar@nattivo.app", hash, "admin", 1]
+      );
+      console.log("  ✓ Usuario creado: minibar@nattivo.app");
+    } else {
+      // Actualizar el primer usuario existente al nuevo email y password
+      const [[firstUser]] = await conn.query("SELECT id FROM users ORDER BY id ASC LIMIT 1");
+      await conn.query(
+        "UPDATE users SET email = ?, password_hash = ?, role = 'admin', full_name = 'Minibar Operator' WHERE id = ?",
+        ["minibar@nattivo.app", hash, firstUser.id]
+      );
+      console.log("  ✓ Usuario actualizado a minibar@nattivo.app");
+    }
   }
 
   // ============================================================

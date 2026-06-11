@@ -47,10 +47,25 @@ router.get("/floors", async (req, res) => {
 // GET /api/minibar/rooms/:floorId
 router.get("/rooms/:floorId", async (req, res) => {
   try {
-    const rows = await query(
-      "SELECT id, room_number FROM rooms WHERE floor_id = ? ORDER BY CAST(room_number AS UNSIGNED) ASC",
+    const raw = await query(
+      `SELECT r.id, r.room_number,
+        (SELECT COUNT(*) FROM room_minibar_inventory rmi WHERE rmi.room_id = r.id) > 0 AS has_inventory,
+        (SELECT MAX(m.created_at) FROM minibar_movements m WHERE m.room_id = r.id) AS last_movement
+      FROM rooms r WHERE r.floor_id = ? ORDER BY CAST(r.room_number AS UNSIGNED) ASC`,
       [req.params.floorId]
     );
+    const rows = raw.map((r) => {
+      let status = "idle";
+      if (r.last_movement) {
+        const hoursSince = (Date.now() - new Date(r.last_movement).getTime()) / 3600000;
+        if (hoursSince < 6) status = "alert";
+        else if (hoursSince < 24) status = "pending";
+        else if (r.has_inventory) status = "ok";
+      } else if (r.has_inventory) {
+        status = "ok";
+      }
+      return { id: r.id, room_number: r.room_number, status, last_movement: r.last_movement };
+    });
     res.json(rows);
   } catch (err) {
     console.error("Error fetching rooms:", err);

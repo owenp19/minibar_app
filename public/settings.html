@@ -12,6 +12,11 @@
 
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/app.css" />
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#4D553D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
   <div class="app-shell">
@@ -20,12 +25,12 @@
     <aside class="sidebar" aria-label="Navegación principal">
       <div class="sidebar-top">
         <div class="sidebar-logo-block">
-          <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
+          <img loading="lazy" src="/images/Logo_Nattivo_v1.png" alt="Nattivo Collection Hotel" class="sidebar-logo" />
         </div>
 
         <div class="sidebar-user">
           <div class="sidebar-user-avatar" aria-hidden="true">
-            <img id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
+            <img loading="lazy" id="user-avatar-img" class="sidebar-avatar-img" src="" alt="Avatar" style="display:none" />
             <span id="user-initials"></span>
           </div>
           <div class="sidebar-user-info">
@@ -161,6 +166,35 @@
         </div>
 
         <div class="settings-card">
+          <h2><i class="ph-light ph-text-aa" style="margin-right: 8px;"></i>Tamaño de letra</h2>
+          <p>Ajusta el tamaño del texto en toda la aplicación.</p>
+          <div class="font-size-options">
+            <div class="font-size-option active" data-font-size="small">
+              <div class="font-size-label">Pequeño</div>
+              <div class="font-size-preview" style="font-size:12px">Aa</div>
+            </div>
+            <div class="font-size-option active" data-font-size="medium">
+              <div class="font-size-label">Mediano</div>
+              <div class="font-size-preview" style="font-size:14px">Aa</div>
+            </div>
+            <div class="font-size-option" data-font-size="large">
+              <div class="font-size-label">Grande</div>
+              <div class="font-size-preview" style="font-size:16px">Aa</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2><i class="ph-light ph-clock" style="margin-right: 8px;"></i>Cambio automático de tema</h2>
+          <p>Cambia entre modo claro y oscuro según la hora del día (claro 6am–7pm, oscuro el resto).</p>
+          <label class="switch-row">
+            <span>Activar cambio automático</span>
+            <input type="checkbox" id="autoswitch-toggle" />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-card">
           <h2><i class="ph-light ph-info" style="margin-right: 8px;"></i><span data-i18n="settingsSystemInfo">Información del sistema</span></h2>
           <p data-i18n="settingsSystemInfoDesc">Versión y estado actual.</p>
           <div class="info-row">
@@ -183,15 +217,15 @@
           <div class="credential-box">
             <div class="credential-row">
               <span class="credential-label" data-i18n="settingsUser">Usuario</span>
-              <span class="badge-role operator">operator</span>
+              <span class="badge-role admin">Admin</span>
             </div>
             <div class="credential-row">
               <span class="credential-label" data-i18n="settingsEmail">Email</span>
-              <span class="credential-value">operador@nattivo.com</span>
+              <span class="credential-value">minibar@nattivo.app</span>
             </div>
             <div class="credential-row">
               <span class="credential-label" data-i18n="settingsPassword">Contraseña</span>
-              <span class="credential-value">admin123</span>
+              <span class="credential-value">minibar123</span>
             </div>
           </div>
           <p style="font-size:12px;color:var(--color-muted);margin:10px 0 0;">
@@ -206,7 +240,7 @@
   <!-- Navigation Preloader -->
   <div id="nav-preloader" class="nav-preloader" aria-hidden="true">
     <div class="nav-preloader-content">
-      <img src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
+      <img loading="lazy" src="/images/Logo_Nattivo_v1.png" alt="Nattivo" class="nav-preloader-logo" />
       <div class="nav-preloader-bar">
         <div class="nav-preloader-fill"></div>
       </div>
@@ -225,6 +259,8 @@
       html.setAttribute("data-theme", saved);
       const lang = localStorage.getItem("chargeit-lang") || "es";
       html.setAttribute("lang", lang);
+      const fontSize = localStorage.getItem("chargeit-font-size") || "medium";
+      html.setAttribute("data-font-size", fontSize);
 
       function setTheme(theme) {
         html.setAttribute("data-theme", theme);
@@ -237,6 +273,36 @@
       document.querySelectorAll(".theme-option").forEach(function(opt) {
         opt.addEventListener("click", function() { setTheme(opt.dataset.themeValue); });
       });
+
+      // Font size
+      document.querySelectorAll(".font-size-option").forEach(function(opt) {
+        if (opt.dataset.fontSize === fontSize) opt.classList.add("active");
+        else opt.classList.remove("active");
+        opt.addEventListener("click", function() {
+          var size = opt.dataset.fontSize;
+          localStorage.setItem("chargeit-font-size", size);
+          html.setAttribute("data-font-size", size);
+          document.querySelectorAll(".font-size-option").forEach(function(o) {
+            o.classList.toggle("active", o.dataset.fontSize === size);
+          });
+        });
+      });
+
+      // Auto-switch theme
+      var autoToggle = document.getElementById("autoswitch-toggle");
+      if (autoToggle) {
+        autoToggle.checked = localStorage.getItem("chargeit-autoswitch") === "1";
+        autoToggle.addEventListener("change", function() {
+          if (autoToggle.checked) {
+            localStorage.setItem("chargeit-autoswitch", "1");
+            var hour = new Date().getHours();
+            var autoTheme = (hour >= 6 && hour < 19) ? "light" : "dark";
+            setTheme(autoTheme);
+          } else {
+            localStorage.removeItem("chargeit-autoswitch");
+          }
+        });
+      }
 
       // Navigation preloader
       document.querySelectorAll(".sidebar-nav a.nav-item[href]").forEach(function(link) {

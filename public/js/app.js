@@ -1695,6 +1695,171 @@ async function init() {
   if (isTouchDevice()) {
     document.documentElement.classList.add("touch-device");
   }
+
+  // Phase 1 features
+  initKeyboardShortcuts();
+  initPullToRefresh();
+  initSwipeActions();
+  initAutoTheme();
+  initFontSize();
+}
+
+/* ══════════════════════════════════════════════════════
+   PHASE 1: KEYBOARD SHORTCUTS
+   ══════════════════════════════════════════════════════ */
+function initKeyboardShortcuts() {
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case "n":
+          e.preventDefault();
+          var submitBtn = document.getElementById("submit-btn") || document.getElementById("save-consumption-btn");
+          if (submitBtn && !submitBtn.disabled) submitBtn.click();
+          break;
+        case "f":
+          e.preventDefault();
+          var searchInput = document.querySelector("#product-search, #quick-room-search, .search-box input");
+          if (searchInput) searchInput.focus();
+          break;
+        case "l":
+          e.preventDefault();
+          var clearBtn = document.getElementById("clear-btn");
+          if (clearBtn) clearBtn.click();
+          break;
+        case "r":
+          e.preventDefault();
+          var refreshBtn = document.getElementById("refresh-rooms-btn") || document.getElementById("refresh-inventory-btn");
+          if (refreshBtn) refreshBtn.click();
+          break;
+        case "d":
+          e.preventDefault();
+          document.getElementById("download-report-btn") && document.getElementById("download-report-btn").click();
+          break;
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   PHASE 1: PULL-TO-REFRESH
+   ══════════════════════════════════════════════════════ */
+function initPullToRefresh() {
+  var containers = document.querySelectorAll(".ptr-enabled");
+  if (!containers.length) return;
+
+  containers.forEach(function (container) {
+    var startY = 0;
+    var pulling = false;
+    var refreshThreshold = 80;
+
+    container.addEventListener("touchstart", function (e) {
+      if (container.scrollTop <= 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    }, { passive: true });
+
+    container.addEventListener("touchmove", function (e) {
+      if (!pulling) return;
+      var diff = e.touches[0].clientY - startY;
+      if (diff > 20) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    container.addEventListener("touchend", function (e) {
+      if (!pulling) return;
+      pulling = false;
+      var diff = e.changedTouches[0].clientY - startY;
+      if (diff > refreshThreshold) {
+        triggerRefresh(container);
+      }
+    }, { passive: true });
+  });
+}
+
+function triggerRefresh(container) {
+  var indicator = container.querySelector(".ptr-indicator");
+  if (indicator) {
+    indicator.classList.add("visible");
+    indicator.innerHTML = '<i class="ph-light ph-spinner spinning"></i> Actualizando…';
+  }
+
+  setTimeout(function () {
+    window.location.reload();
+  }, 600);
+}
+
+/* ══════════════════════════════════════════════════════
+   PHASE 1: SWIPE ACTIONS
+   ══════════════════════════════════════════════════════ */
+function initSwipeActions() {
+  document.querySelectorAll(".swipe-container").forEach(function (container) {
+    var content = container.querySelector(".swipe-content");
+    var actions = container.querySelector(".swipe-actions");
+    if (!content || !actions) return;
+
+    var startX = 0;
+    var currentX = 0;
+    var isDragging = false;
+    var isOpen = false;
+    var threshold = 60;
+    var actionWidth = actions.offsetWidth || 140;
+
+    container.addEventListener("touchstart", function (e) {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    }, { passive: true });
+
+    container.addEventListener("touchmove", function (e) {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+      var diff = startX - currentX;
+
+      if (diff > 10) {
+        e.preventDefault();
+        var translate = Math.min(Math.max(isOpen ? actionWidth - Math.abs(diff) : diff, 0), actionWidth);
+        content.style.transform = "translateX(-" + translate + "px)";
+      }
+    }, { passive: false });
+
+    container.addEventListener("touchend", function () {
+      if (!isDragging) return;
+      isDragging = false;
+      var diff = startX - currentX;
+
+      if (diff > threshold && !isOpen) {
+        isOpen = true;
+        content.style.transform = "translateX(-" + actionWidth + "px)";
+        actions.classList.add("open");
+      } else if (isOpen && diff < -20) {
+        isOpen = false;
+        content.style.transform = "translateX(0)";
+        actions.classList.remove("open");
+      } else if (!isOpen) {
+        content.style.transform = "translateX(0)";
+      }
+    }, { passive: true });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   PHASE 1: AUTO THEME
+   ══════════════════════════════════════════════════════ */
+function initAutoTheme() {
+  if (typeof applyAutoTheme === "function" && typeof isAutoSwitchEnabled === "function") {
+    if (isAutoSwitchEnabled()) applyAutoTheme();
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   PHASE 1: FONT SIZE
+   ══════════════════════════════════════════════════════ */
+function initFontSize() {
+  if (typeof setFontSize === "function") {
+    var saved = localStorage.getItem("chargeit-font-size") || "medium";
+    setFontSize(saved);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
