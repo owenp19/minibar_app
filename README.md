@@ -303,8 +303,8 @@ El siguiente usuario se crea automáticamente al ejecutar `npm run seed`:
 
 ## Estado actual del proyecto
 
-**Versión:** 1.0.1
-**Estado:** Funcional en desarrollo. Listo para pruebas en entorno controlado.
+**Versión:** 2.0.1
+**Estado:** Funcional en producción. Implementado en Nattivo Collection Hotel.
 **Base de datos:** MySQL con seed inicial.
 
 ## Próximos pasos sugeridos
@@ -338,3 +338,8 @@ El archivo `.env` contiene credenciales de base de datos y una clave secreta de 
 - En `.env`: `SESSION_SECRET` hardcodeado — debe ser único por instancia
 - En `src/db/seed.js`: Código de registro admin `7777` hardcodeado
 - En `public/js/app.js`: Número de WhatsApp placeholder `573001234567`
+
+---
+
+**Desarrollado por Owen Pusey — Minibar Hotel Nattivo**  
+*v2.0.1*

@@ -85,6 +85,7 @@ router.get("/inventory/:roomId", async (req, res) => {
         mp.name AS product_name,
         mp.price AS product_price,
         mp.default_quantity,
+        mp.image_url,
         mc.id AS category_id,
         mc.name AS category_name
       FROM room_minibar_inventory rmi

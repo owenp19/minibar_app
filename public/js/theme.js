@@ -80,10 +80,18 @@ function applyAutoTheme() {
 
 function toggleAutoSwitch(enable) {
   if (enable) {
+    // Save current manual theme before auto-switch takes over
+    localStorage.setItem("chargeit-theme-manual", getCurrentTheme());
     localStorage.setItem("chargeit-autoswitch", "1");
     applyAutoTheme();
   } else {
     localStorage.removeItem("chargeit-autoswitch");
+    // Restore the manual theme that was saved before enabling
+    var manual = localStorage.getItem("chargeit-theme-manual");
+    if (manual) {
+      localStorage.removeItem("chargeit-theme-manual");
+      setTheme(manual);
+    }
   }
 }
 

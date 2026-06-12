@@ -161,6 +161,16 @@ async function migrate() {
     console.log("Note:", e.message);
   }
 
+  // Add image_url to minibar_products
+  try {
+    await conn.query(
+      "ALTER TABLE minibar_products ADD COLUMN image_url VARCHAR(500) DEFAULT NULL AFTER display_order"
+    );
+    console.log("OK: image_url column added to minibar_products");
+  } catch (e) {
+    console.log("Note:", e.message);
+  }
+
   await conn.end();
 }
 

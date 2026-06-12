@@ -199,7 +199,7 @@
           <p data-i18n="settingsSystemInfoDesc">Versión y estado actual.</p>
           <div class="info-row">
             <span class="info-label" data-i18n="settingsVersion">Versión</span>
-            <span class="info-value">1.0.1</span>
+            <span class="info-value">2.0.1</span>
           </div>
           <div class="info-row">
             <span class="info-label" data-i18n="settingsDatabase">Base de datos</span>
@@ -291,16 +291,9 @@
       // Auto-switch theme
       var autoToggle = document.getElementById("autoswitch-toggle");
       if (autoToggle) {
-        autoToggle.checked = localStorage.getItem("chargeit-autoswitch") === "1";
+        autoToggle.checked = isAutoSwitchEnabled();
         autoToggle.addEventListener("change", function() {
-          if (autoToggle.checked) {
-            localStorage.setItem("chargeit-autoswitch", "1");
-            var hour = new Date().getHours();
-            var autoTheme = (hour >= 6 && hour < 19) ? "light" : "dark";
-            setTheme(autoTheme);
-          } else {
-            localStorage.removeItem("chargeit-autoswitch");
-          }
+          toggleAutoSwitch(autoToggle.checked);
         });
       }
 

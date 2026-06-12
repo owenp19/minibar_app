@@ -7,6 +7,12 @@ const rateLimit = require("express-rate-limit");
 const { initDbPool } = require("./config/db");
 const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
 
+// Ensure upload directories exist
+const productsDir = path.join(__dirname, "..", "public", "uploads", "products");
+if (!require("fs").existsSync(productsDir)) {
+  require("fs").mkdirSync(productsDir, { recursive: true });
+}
+
 const productRoutes = require("./routes/productRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");

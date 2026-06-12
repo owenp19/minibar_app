@@ -455,7 +455,13 @@
         const expStatus = getExpirationStatus(item.expiration_date);
         const expLabel = item.expiration_date ? formatDateLocal(item.expiration_date) : 'No definida';
 
+        const imgSrc = item.image_url || '';
+        const imgHtml = imgSrc
+          ? '<img src="' + imgSrc + '" alt="" class="product-thumb" loading="lazy" />'
+          : '<span style="width:32px;height:32px;border-radius:6px;background:var(--color-card-soft);display:inline-block;border:1px solid var(--color-border-soft);flex-shrink:0"></span>';
+
         html += '<div class="product-row-minibar' + (isAgotado ? ' agotado' : '') + '" data-product-id="' + item.product_id + '">' +
+          imgHtml +
           '<div class="product-info">' +
             '<div class="product-name-text">' +
               item.product_name +
@@ -521,7 +527,12 @@
       for (const item of items) {
         const isAgotado = item.quantity === 0;
         const itemTotal = 0;
+        const imgSrc = item.image_url || '';
+        const imgHtml = imgSrc
+          ? '<img src="' + imgSrc + '" alt="" class="product-thumb" loading="lazy" />'
+          : '<span class="product-thumb-placeholder"></span>';
         html += '<div class="product-row-consumption' + (isAgotado ? ' agotado' : '') + '" data-product-id="' + item.product_id + '" data-price="' + item.product_price + '">' +
+          imgHtml +
           '<div class="product-consumption-info">' +
             '<div class="product-name-text">' +
               item.product_name +
@@ -708,7 +719,12 @@
       '</div>';
 
       for (const item of items) {
+        const imgSrc = item.image_url || '';
+        const imgHtml = imgSrc
+          ? '<img src="' + imgSrc + '" alt="" class="product-thumb" loading="lazy" />'
+          : '<span class="product-thumb-placeholder"></span>';
         html += '<div class="product-row-restock" data-product-id="' + item.product_id + '">' +
+          imgHtml +
           '<div class="product-info">' +
             '<div class="product-name-text">' + item.product_name + '</div>' +
             '<div class="product-details-row">' +
@@ -841,7 +857,12 @@
       '</div>';
 
       for (const item of items) {
+        const imgSrc = item.image_url || '';
+        const imgHtml = imgSrc
+          ? '<img src="' + imgSrc + '" alt="" class="product-thumb" loading="lazy" />'
+          : '<span class="product-thumb-placeholder"></span>';
         html += '<div class="product-row-adjust" data-product-id="' + item.product_id + '">' +
+          imgHtml +
           '<div class="product-info">' +
             '<div class="product-name-text">' + item.product_name + '</div>' +
             '<div class="product-details-row">' +

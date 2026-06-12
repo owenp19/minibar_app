@@ -1,9 +1,37 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { query, getDbPool } = require("../config/db");
 const { logAudit, getClientIp, getDeviceInfo } = require("../auditLogger");
 
 const router = express.Router();
+
+// Multer config for product images
+const productStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, "..", "..", "public", "uploads", "products");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const name = "prod_" + Date.now() + ext;
+    cb(null, name);
+  }
+});
+
+const productUpload = multer({
+  storage: productStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = [".jpg", ".jpeg", ".png", ".webp"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) return cb(null, true);
+    cb(new Error("Formato no permitido. Usa JPG, PNG o WebP."));
+  }
+});
 
 // ============ PRODUCT MANAGEMENT ============
 
@@ -11,7 +39,7 @@ const router = express.Router();
 router.get("/products", async (req, res) => {
   try {
     const rows = await query(
-      `SELECT mp.id, mp.name, mp.price, mp.default_quantity, mp.display_order, mp.is_active, mp.created_at,
+      `SELECT mp.id, mp.name, mp.price, mp.default_quantity, mp.display_order, mp.image_url, mp.is_active, mp.created_at,
               mc.id AS category_id, mc.name AS category_name
        FROM minibar_products mp
        JOIN minibar_categories mc ON mc.id = mp.category_id
@@ -137,6 +165,60 @@ router.delete("/products/:id", async (req, res) => {
   } catch (err) {
     console.error("Error deleting product:", err);
     res.status(500).json({ error: "Error al desactivar producto" });
+  }
+});
+
+// POST /api/admin/products/:id/image — upload product image
+router.post("/products/:id/image", productUpload.single("image"), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    if (!req.file) return res.status(400).json({ error: "No se envió ninguna imagen." });
+
+    const imageUrl = "/uploads/products/" + req.file.filename;
+
+    // Delete old image if exists
+    const rows = await query("SELECT image_url FROM minibar_products WHERE id = ?", [productId]);
+    const oldRow = rows[0];
+    if (oldRow && oldRow.image_url) {
+      const oldPath = path.join(__dirname, "..", "..", "public", oldRow.image_url);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    await query("UPDATE minibar_products SET image_url = ? WHERE id = ?", [imageUrl, productId]);
+
+    logAudit({
+      userId: req.session?.user?.id,
+      userName: req.session?.user?.fullName,
+      userRole: req.session?.user?.role,
+      moduleName: "Productos",
+      actionType: "product_image_updated",
+      actionDescription: "Actualizó la imagen del producto #" + productId,
+      productId: Number(productId),
+      ipAddress: getClientIp(req),
+      deviceInfo: getDeviceInfo(req)
+    });
+
+    res.json({ success: true, imageUrl, message: "Imagen actualizada correctamente." });
+  } catch (err) {
+    console.error("Error uploading product image:", err);
+    res.status(500).json({ error: "Error al subir la imagen." });
+  }
+});
+
+// DELETE /api/admin/products/:id/image — remove product image
+router.delete("/products/:id/image", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const rows = await query("SELECT image_url FROM minibar_products WHERE id = ?", [productId]);
+    const oldRow = rows[0];
+    if (oldRow && oldRow.image_url) {
+      const oldPath = path.join(__dirname, "..", "..", "public", oldRow.image_url);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+    await query("UPDATE minibar_products SET image_url = NULL WHERE id = ?", [productId]);
+    res.json({ success: true, message: "Imagen eliminada." });
+  } catch (err) {
+    res.status(500).json({ error: "Error al eliminar la imagen." });
   }
 });
 

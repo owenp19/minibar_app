@@ -45,25 +45,26 @@
         </div>
 
         <nav class="sidebar-nav">
-          <a href="/app/dashboard" class="nav-item">
-            <i class="ph-light ph-chart-pie nav-icon"></i>
-            <span class="nav-label">Dashboard</span>
-          </a>
+          <div class="nav-group-label"><i class="ph-light ph-wine"></i> <span>Operaciones</span></div>
+
           <a href="/app/minibar" class="nav-item">
             <i class="ph-light ph-wine nav-icon"></i>
             <span class="nav-label" data-i18n="navMinibars">Minibares</span>
           </a>
-          <a href="/app/admin" class="nav-item nav-item-active" aria-current="page">
-            <i class="ph-light ph-shield-check nav-icon"></i>
-            <span class="nav-label">Admin</span>
+          <a href="/app/perdidas" class="nav-item">
+            <i class="ph-light ph-chart-bar nav-icon"></i>
+            <span class="nav-label">Pérdidas</span>
           </a>
           <a href="/unlock.html" class="nav-item">
             <i class="ph-light ph-key nav-icon"></i>
             <span class="nav-label" data-i18n="navUnlock">Desbloqueo</span>
           </a>
-          <a href="/app/perdidas" class="nav-item">
-            <i class="ph-light ph-chart-bar nav-icon"></i>
-            <span class="nav-label">Pérdidas</span>
+
+          <div class="nav-group-label"><i class="ph-light ph-chart-pie"></i> <span>Informes</span></div>
+
+          <a href="/app/dashboard" class="nav-item">
+            <i class="ph-light ph-chart-pie nav-icon"></i>
+            <span class="nav-label">Dashboard</span>
           </a>
           <a href="/app/reportes" class="nav-item">
             <i class="ph-light ph-file-text nav-icon"></i>
@@ -72,6 +73,13 @@
           <a href="/app/auditoria" class="nav-item">
             <i class="ph-light ph-clipboard-text nav-icon"></i>
             <span class="nav-label">Auditoría</span>
+          </a>
+
+          <div class="nav-group-label"><i class="ph-light ph-gear"></i> <span>Administración</span></div>
+
+          <a href="/app/admin" class="nav-item nav-item-active" aria-current="page">
+            <i class="ph-light ph-shield-check nav-icon"></i>
+            <span class="nav-label">Admin</span>
           </a>
           <a href="/perfil" class="nav-item">
             <i class="ph-light ph-user nav-icon"></i>
@@ -106,11 +114,11 @@
         </button>
 
         <div class="main-header-title">
-          <div id="breadcrumb">
-            <span class="crumb">
-              <i class="ph-light ph-house"></i>
-              <span class="crumb-current">Admin</span>
-            </span>
+          <div class="breadcrumb" id="breadcrumb">
+            <i class="ph-light ph-house"></i>
+            <span>Admin</span>
+            <i class="ph-light ph-caret-right"></i>
+            <strong id="bc-current-section" class="crumb-current">Dashboard</strong>
           </div>
 
           <h1>
@@ -149,6 +157,7 @@
           <button class="admin-tab" data-section="products">
             <i class="ph-light ph-shopping-bag"></i>
             <span>Productos</span>
+            <span class="admin-tab-badge" id="badge-products" style="display:none">0</span>
           </button>
           <button class="admin-tab" data-section="categories">
             <i class="ph-light ph-tag"></i>
@@ -161,10 +170,12 @@
           <button class="admin-tab" data-section="rooms">
             <i class="ph-light ph-bed"></i>
             <span>Habitaciones</span>
+            <span class="admin-tab-badge" id="badge-rooms" style="display:none">0</span>
           </button>
           <button class="admin-tab" data-section="users">
             <i class="ph-light ph-user"></i>
             <span>Usuarios</span>
+            <span class="admin-tab-badge" id="badge-users" style="display:none">0</span>
           </button>
         </div>
 

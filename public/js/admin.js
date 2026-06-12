@@ -20,6 +20,12 @@
     if (tab) tab.classList.add('active');
     const section = $(`#section-${sectionId}`);
     if (section) section.classList.add('active');
+    // update breadcrumb
+    const bc = $('#bc-current-section');
+    if (bc) {
+      const labels = { dashboard: 'Dashboard', products: 'Productos', categories: 'Categorías', floors: 'Pisos', rooms: 'Habitaciones', users: 'Usuarios' };
+      bc.textContent = labels[sectionId] || sectionId;
+    }
   }
 
   async function apiFetch(url, options = {}) {
@@ -150,6 +156,12 @@
     try {
       adminProducts = await apiFetch('/api/admin/products');
       adminCategories = await apiFetch('/api/admin/categories');
+      // update badge
+      const badge = document.getElementById('badge-products');
+      if (badge) {
+        badge.textContent = adminProducts.length;
+        badge.style.display = adminProducts.length ? '' : 'none';
+      }
       renderAdminProducts();
     } catch (err) {
       el.productsList.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
@@ -162,11 +174,13 @@
       return;
     }
     let html = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>' +
-      '<th>ID</th><th>Nombre</th><th>Precio</th><th>Categor&iacute;a</th><th>Stock base</th><th>Orden</th><th>Activo</th><th>Acciones</th>' +
+      '<th></th><th>Nombre</th><th>Precio</th><th>Categor&iacute;a</th><th>Stock base</th><th>Orden</th><th>Activo</th><th>Acciones</th>' +
       '</tr></thead><tbody>';
     for (const p of adminProducts) {
+      const imgSrc = p.image_url || '';
+      const imgHtml = imgSrc ? '<img src="' + imgSrc + '" alt="" class="product-thumb-sm" />' : '<span style="width:24px;height:24px;border-radius:4px;background:var(--color-card-soft);display:inline-block;border:1px solid var(--color-border-soft)"></span>';
       html += '<tr>' +
-        '<td>' + p.id + '</td>' +
+        '<td style="padding:4px 6px">' + imgHtml + '</td>' +
         '<td>' + p.name + '</td>' +
         '<td>' + formatCOP(p.price) + '</td>' +
         '<td>' + (p.category_name || '&mdash;') + '</td>' +
@@ -199,10 +213,13 @@
     const defaultQty = product ? product.default_quantity : 1;
     const displayOrder = product ? product.display_order : 0;
     const isActive = product ? product.is_active : 1;
+    const imageUrl = product ? (product.image_url || '') : '';
 
     const catOptions = adminCategories.map((c) =>
       '<option value="' + c.id + '"' + (c.id === categoryId ? ' selected' : '') + '>' + c.name + '</option>'
     ).join('');
+
+    const imgPreviewStyle = imageUrl ? 'style="border-style:solid"' : '';
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay visible';
@@ -233,6 +250,16 @@
             '<label>Orden de visualizaci&oacute;n</label>' +
             '<input class="admin-input" id="modal-product-order" type="number" min="0" value="' + displayOrder + '" />' +
           '</div>' +
+          '<div class="admin-form-group">' +
+            '<label>Imagen del producto</label>' +
+            '<div class="product-image-upload-wrap">' +
+              '<img id="modal-product-img-preview" class="product-image-preview has-image" src="' + (imageUrl || '/images/mujer_isle%C3%B1a.png') + '" ' + imgPreviewStyle + ' alt="Preview" />' +
+              '<div>' +
+                '<input type="file" id="modal-product-img" class="admin-input" accept="image/*" ' + (productId ? '' : 'disabled') + ' />' +
+                '<div class="helper-text"><i class="ph-light ph-info"></i> <span>Selecciona una imagen (JPG, PNG). M&aacute;x 2MB.</span></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
           (productId ? '<div class="admin-form-group"><label><input type="checkbox" id="modal-product-active"' + (isActive ? ' checked' : '') + ' /> Activo</label></div>' : '') +
         '</div>' +
         '<div class="modal-footer">' +
@@ -250,6 +277,23 @@
       if (e.target === modal) modal.remove();
     });
 
+    // image preview
+    const imgInput = modal.querySelector('#modal-product-img');
+    const imgPreview = modal.querySelector('#modal-product-img-preview');
+    if (imgInput) {
+      imgInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            imgPreview.src = e.target.result;
+            imgPreview.classList.add('has-image');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
     modal.querySelector('#modal-product-save').addEventListener('click', async () => {
       const body = {
         name: modal.querySelector('#modal-product-name').value.trim(),
@@ -262,10 +306,27 @@
         body.isActive = modal.querySelector('#modal-product-active').checked ? 1 : 0;
       }
       try {
+        let result;
         if (productId) {
-          await apiFetch('/api/admin/products/' + productId, { method: 'PUT', body: JSON.stringify(body) });
+          result = await apiFetch('/api/admin/products/' + productId, { method: 'PUT', body: JSON.stringify(body) });
         } else {
-          await apiFetch('/api/admin/products', { method: 'POST', body: JSON.stringify(body) });
+          result = await apiFetch('/api/admin/products', { method: 'POST', body: JSON.stringify(body) });
+          productId = result.id;
+        }
+        // upload image if selected
+        const file = imgInput ? imgInput.files[0] : null;
+        if (file && productId) {
+          const formData = new FormData();
+          formData.append('image', file);
+          const imgRes = await fetch('/api/admin/products/' + productId + '/image', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+          });
+          if (!imgRes.ok) {
+            const imgErr = await imgRes.json().catch(function() { return { error: 'Error al subir imagen' }; });
+            console.warn('Image upload failed:', imgErr.error);
+          }
         }
         modal.remove();
         await loadAdminProducts();
@@ -503,6 +564,8 @@
     el.roomsList.innerHTML = '<div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>';
     try {
       adminRooms = await apiFetch('/api/admin/rooms');
+      const badgeRooms = document.getElementById('badge-rooms');
+      if (badgeRooms) { badgeRooms.textContent = adminRooms.length; badgeRooms.style.display = adminRooms.length ? '' : 'none'; }
       renderAdminRooms();
     } catch (err) {
       el.roomsList.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';
@@ -611,6 +674,8 @@
     el.usersList.innerHTML = '<div class="empty-state"><i class="ph-light ph-spinner spinning"></i><h3>Cargando...</h3></div>';
     try {
       adminUsers = await apiFetch('/api/admin/users');
+      const badgeUsers = document.getElementById('badge-users');
+      if (badgeUsers) { badgeUsers.textContent = adminUsers.length; badgeUsers.style.display = adminUsers.length ? '' : 'none'; }
       renderAdminUsers();
     } catch (err) {
       el.usersList.innerHTML = '<div class="empty-state"><i class="ph-light ph-warning-circle"></i><h3>Error</h3><p>' + err.message + '</p></div>';

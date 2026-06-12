@@ -330,7 +330,7 @@ const translations = {
     auditDetailDevice: "Dispositivo",
 
     /* Footer */
-    footerVersion: "v1.0.1",
+    footerVersion: "v2.0.1",
     footerDeveloped: "Desarrollado por Owen Pusey — Minibar Hotel Nattivo",
   },
 
@@ -658,7 +658,7 @@ const translations = {
     auditDetailDevice: "Device",
 
     /* Footer */
-    footerVersion: "v1.0.1",
+    footerVersion: "v2.0.1",
     footerDeveloped: "Developed by Owen Pusey — Minibar Hotel Nattivo",
   }
 };
